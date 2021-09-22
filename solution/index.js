@@ -6,7 +6,9 @@ let tasks = {
     done: [],
 }
 let taskIdcount = 0
-// sendDataToLocal() //sets localstorage to none on every refresh!
+//sendDataToLocal() //sets localstorage to none on every refresh!
+getDataFromLocal()
+displayElements(tasks)
 
 function addTask(
     title,
@@ -39,7 +41,7 @@ function addTask(
     if (state === 'in-progress') tasks['in-progress'].unshift(newTask)
     if (state === 'done') tasks.done.unshift(newTask)
     sendDataToLocal()
-    console.log(localStorage.getItem('tasks'))
+    displayElements(tasks)
 }
 function updateTaskIdcount() {
     taskIdcount++
@@ -72,4 +74,80 @@ function addInProgressTask() {
 }
 function addDoneTask() {
     addTask(getInputInfo('add-done-task'), 'done')
+}
+function addElement(parentId, element) {
+    document.getElementById(parentId).appendChild(element)
+}
+function generateTasks(tasks) {
+    for (let task of tasks.todo) {
+        createTaskElement(task)
+    }
+    for (let task of tasks['in-progress']) {
+        createTaskElement(task)
+    }
+    for (let task of tasks.done) {
+        createTaskElement(task)
+    }
+}
+function removeAllchildrens(Id) {
+    //remove all the childrens from parant
+
+    let parent = document.getElementById(Id)
+    while (parent.firstChild) {
+        parent.removeChild(parent.lastChild)
+    }
+}
+function displayElements(tasks) {
+    removeAllchildrens('toDoTasks')
+    removeAllchildrens('inProgressTasks')
+    removeAllchildrens('doneTasks')
+    generateTasks(tasks)
+}
+function createTaskElement(task) {
+    let newElement = createElement('li', [], ['task'], {})
+    newElement.innerText = task.title
+    if (task.state === 'todo') addElement('toDoTasks', newElement)
+    if (task.state === 'in-progress') addElement('inProgressTasks', newElement)
+    if (task.state === 'done') addElement('doneTasks', newElement)
+}
+function createElement(
+    tagname,
+    children = [],
+    classes = [],
+    attributes,
+    events
+) {
+    //the most generic element builder.
+    //we will build all the elements here.
+
+    const el = document.createElement(tagname)
+
+    //children
+
+    for (let child of children) {
+        if (typeof child === 'string' || typeof child === 'number') {
+            child = document.createTextNode(child)
+        }
+        el.appendChild(child)
+    }
+
+    //classes
+
+    for (const cls of classes) {
+        el.classList.add(cls)
+    }
+
+    //attrubutes
+
+    for (const attr in attributes) {
+        el.setAttribute(attr, attributes[attr])
+    }
+
+    //attrubutes
+
+    for (const event in events) {
+        el.addEventListener(event, events[event])
+    }
+
+    return el
 }
