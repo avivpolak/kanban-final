@@ -10,7 +10,7 @@ if (!localStorage.tasks) {
     sendToLocal()
 }
 tasks = JSON.parse(localStorage.getItem('tasks')) //get info from local storage.
-
+displayElements()
 //making the bottons work
 document.getElementById('submit-add-to-do').addEventListener('click', addToDoTask)
 document.getElementById('submit-add-in-progress').addEventListener('click', addInProgressTask)
