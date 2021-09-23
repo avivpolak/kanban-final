@@ -195,6 +195,8 @@ document.getElementById('inProgressTasks').addEventListener('blur', handleBlur)
 document.getElementById('doneTasks').addEventListener('blur', handleBlur)
 
 let correntTaskBelow = null
+let correntTaskElementBelow = null
+
 function mouseOverParent(e) {
     //when the mouse over parent
     //-->update corrent element below(if its LI)
@@ -204,9 +206,17 @@ function mouseOverParent(e) {
     if (e.target.tagName === 'LI') {
         correntTaskBelow = e.target.innerText
     }
+
+    correntTaskElementBelow = null //an real-time updated object that indicates the the tops element below mouse
+    if (e.target.tagName === 'LI') {
+        correntTaskElementBelow = e.target
+    }
 }
 function handleDubleClick(event) {
     console.log(correntTaskBelow)
+    //make the name --> input with a placeholder(maybe import from mp3-dom)
+    //make it focus.
+    correntTaskElementBelow.focus()
 }
 function handleBlur(event) {
     console.log(correntTaskBelow)
