@@ -53,7 +53,9 @@ function addTask(title, state, desctiption, priority, deadLine, parantTask, time
     if (state === 'todo') tasks.todo.unshift(newTask)
     if (state === 'in-progress') tasks['in-progress'].unshift(newTask)
     if (state === 'done') tasks.done.unshift(newTask)
-    displayAndSendDataToLocal()
+
+    displayAndSendDataToLocal() //display and send  after return
+    return newTask.taskId
 }
 
 function getInputInfo(inputId) {
@@ -88,15 +90,17 @@ function updateTask(taskId, newProps) {
 
 function taskFromId(taskId) {
     //returns the task with that id
-
     taskId = parseInt(taskId)
     for (let task of tasks.todo) {
+        console.log('1' + ' ' + task.taskId + ' ' + taskId)
         if (task.taskId === taskId) return task
     }
     for (let task of tasks['in-progress']) {
+        console.log('2' + ' ' + task.taskId + ' ' + taskId)
         if (task.taskId === taskId) return task
     }
     for (let task of tasks.done) {
+        console.log('3' + ' ' + task.taskId + ' ' + taskId)
         if (task.taskId === taskId) return task
     }
     throw new Error("no such task's id")
@@ -120,10 +124,10 @@ let isKeyPressed = {
     1: false,
     2: false,
     3: false,
-    Alt: false,
+    Alt: false, //for some resun its stuck on true
 }
 let correntTaskIdBelow = null //an real-time updated object that indicates the the tops element below mouse
-
+function highlight() {}
 function handleMouseOverParent(parentId) {
     //do this to parent:
 
@@ -142,10 +146,11 @@ function handleMouseOverParent(parentId) {
     function mouseOverParent(e) {
         //when the mouse over parent
         //-->update corrent element below(if its LI)
-
+        //displayAndSendDataToLocal() //to clear the highlight
         correntTaskIdBelow = null
         if (e.target.tagName === 'LI') {
             correntTaskIdBelow = e.target.dataset.id
+            e.target.classList.add('highlight')
         }
     }
 
@@ -174,9 +179,8 @@ function handleMouseOverParent(parentId) {
         //when a key is up
         //stop listen to keyup.
         //set its corrisponding isKeyPressed key to false
-
-        document.removeEventListener('keyup', handleKeyUp)
         KeyUpEvent.preventDefault()
+        document.removeEventListener('keyup', handleKeyUp)
         isKeyPressed[KeyUpEvent.key] = false
     }
     function mouseLeaveParent() {
@@ -219,8 +223,13 @@ function moveATask(updatedTask, origin, target) {
     //copy this task(?) using taskfrom id
     //use remove() to remove from origin "state"
     //use addTask (GENERIC) to add to target "state"
-    removeTask(updatedTask.taskId, origin)
-    addTask(updatedTask.title, target)
+    let oldtaskId = updatedTask.taskId
+    removeTask(oldtaskId, origin)
+    let newId = addTask(updatedTask.title, target)
+    tasks[target][taskIndexById(newId, target)].taskId = oldtaskId
+    // if (tasks[origin][taskIndexById(newId, origin)].taskId === oldtaskId || tasks[origin][taskIndexById(newId, target)].taskId) {
+    //     throw new Error('this is the error')
+    // }
 }
 function removeTask(taskId, origin) {
     //remove this task from "tasks"
@@ -232,18 +241,31 @@ function removeTask(taskId, origin) {
     displayAndSendDataToLocal()
 }
 
-function taskIndexById(taskId, origin) {
+function taskIndexById(taskId) {
     //parameters: task id  and where to check for it(state)
-    //returns the index of it in this state of "tasks"
+    //returns found (obj):{ index:index of the id,state:where it was found (tasks.todo/in progress/done)}
 
     taskId = parseInt(taskId)
-
-    for (let i = 0; i < tasks[origin].length; i++) {
-        console.log(tasks[origin][i].taskId, taskId)
+    let found = {}
+    for (let i = 0; i < tasks['todo'].length; i++) {
         if (tasks[origin][i].taskId === taskId) {
-            return i
+            found.index = i
+            found.state = 'todo'
         }
     }
+    for (let i = 0; i < tasks['in-progress'].length; i++) {
+        if (tasks[origin][i].taskId === taskId) {
+            found.index = i
+            found.state = 'in-progress'
+        }
+    }
+    for (let i = 0; i < tasks['done'].length; i++) {
+        if (tasks[origin][i].taskId === taskId) {
+            found.index = i
+            found.state = 'done'
+        }
+    }
+
     return -1
 }
 
