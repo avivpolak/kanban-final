@@ -1,13 +1,30 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="./index.js" defer></script>
-    <link rel="stylesheet" href="./styles.css" />
-    <title>Tasks manager</title>
-</head>
-<body>
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="./index.js" defer></script>
+        <link rel="stylesheet" href="./styles.css" />
+        <title>Tasks manager</title>
+    </head>
+    <body>
+        <h1 id="page-title">avivs kanban</h1>
+        <input id="search" type="text" placeholder="search" />
+        <section>
+            <input id="add-to-do-task" type="text" placeholder="new to do task" />
+            <button id="submit-add-to-do">submit add to do</button>
+            <ul id="toDoTasks" class="to-do-tasks"></ul>
+        </section>
+        <section>
+            <input id="add-in-progress-task" type="text" placeholder="new in progress task" />
+            <button id="submit-add-in-progress">submit add in progress</button>
+            <ul id="inProgressTasks" class="in-progress-tasks"></ul>
+        </section>
+        <section>
+            <input id="add-done-task" type="text" placeholder="new done task" />
+            <button id="submit-add-done">submit add done</button>
+            <ul id="doneTasks" class="done-tasks"></ul>
+        </section>
+    </body>
 </html>
