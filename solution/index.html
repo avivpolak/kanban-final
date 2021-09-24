@@ -15,7 +15,18 @@
         <button id="load-btn">load</button>
         <div id="errorBar"></div>
         <section>
+            <label for="add-to-do-task">title:</label>
             <input id="add-to-do-task" type="text" placeholder="new to do task" />
+            <label for="description">Description:</label>
+            <input id="description" type="text" placeholder="description" />
+            <label for="priority">Priority:</label>
+            <input id="priority" type="number" placeholder="1-10" />
+            <label for="deadline">Deadline:</label>
+            <input id="deadline" type="date" placeholder="deadline" />
+            <label for="timeEstimated">Time Estimated:</label>
+            <input id="timeEstimated" type="number" placeholder="days" />
+            <label for="parentTask">Parent Task:</label>
+            <input id="parentTask" type="text" placeholder="parentTask" />
             <button id="submit-add-to-do">submit add to do</button>
             <ul id="toDoTasks" class="to-do-tasks"></ul>
         </section>

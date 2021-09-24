@@ -1,30 +1,20 @@
 'use strict'
-
-let taskExtraInfo = {
-    task1: {
-        description: 'description task 1',
-        priority: 1,
-        createTime: undefined,
-        deadline: undefined,
-        timeEstimated: undefined,
-        dependsOnTasks: ['task3', 'task22'],
-        parentTask: 'task0',
-        finishTime: undefined,
-    },
+let tasks = {
+    todo: [],
+    'in-progress': [],
+    done: [],
 }
+let taskExtraInfo = {}
 
 if (!localStorage.tasks) {
-    //if there is info in local storage use it , otherwise create a new, empty "tasks" & "taskIdcount"
-
-    let tasks = {
-        todo: [],
-        'in-progress': [],
-        done: [],
-    }
-
+    //if there is info in local storage use it , otherwise use the new, empty "tasks" & "taskExtraInfo"
     localStorage.setItem('tasks', JSON.stringify(tasks))
-}
-let tasks = JSON.parse(localStorage.getItem('tasks')) //get info from local storage.
+} else tasks = JSON.parse(localStorage.getItem('tasks')) //get info from local storage.
+
+if (!localStorage.taskExtraInfo) {
+    localStorage.setItem('taskExtraInfo', JSON.stringify(taskExtraInfo))
+} else JSON.parse(localStorage.getItem('taskExtraInfo'))
+
 displayElements()
 //making the bottons work
 document.getElementById('submit-add-to-do').addEventListener('click', handleaddToDoTask)
@@ -43,8 +33,21 @@ function getInputInfo(inputId) {
 //databases
 function sendToLocal() {
     localStorage.setItem('tasks', JSON.stringify(tasks))
+    localStorage.setItem('taskExtraInfo', JSON.stringify(taskExtraInfo))
 }
-
+function addExtra(title) {
+    taskExtraInfo[title] = {}
+    taskExtraInfo[title].description = document.getElementById('description').value
+    taskExtraInfo[title].priority = document.getElementById('priority').value
+    taskExtraInfo[title].deadline = document.getElementById('deadline').value
+    taskExtraInfo[title].timeEstimated = document.getElementById('timeEstimated').value
+    taskExtraInfo[title].parentTask = document.getElementById('parentTask').value
+}
+function manageAdd(title, state) {
+    console.log(title)
+    addExtra(title)
+    addTask(title, state)
+}
 //add section
 function addTask(title, state) {
     tasks[state].unshift(title)
@@ -61,8 +64,7 @@ function handleaddToDoTask() {
         alert('you cant have 2 tasks with the same name')
         return null
     }
-
-    addTask(getInputInfo('add-to-do-task'), 'todo')
+    manageAdd(document.getElementById('add-to-do-task').value, 'todo')
 }
 function handleaddInProgressTask() {
     if (document.getElementById('add-in-progress-task').value === '') {
@@ -170,7 +172,7 @@ function createElement(tagname, children = [], classes = [], attributes, events)
     //the most generic element builder.
     //we will build all the elements here.
 
-    const el = document.createElement(tagname)
+    let el = document.createElement(tagname)
 
     //children
 
@@ -210,13 +212,28 @@ function appendElement(parentId, element) {
 function createTaskElement(title, state) {
     //uses createElement to creat an task elment
     //appends it to the match ul
-    const newNameInput = createElement('input', [], ['hide'], { type: 'text', placeholder: title })
-    let newTaskElement = createElement('li', [newNameInput], ['task', 'draggable'], {})
 
-    newNameInput.value = title
-    newTaskElement.innerText = title
-    newTaskElement.appendChild(newNameInput)
-
+    let newTaskElement = createElement('li', [title], ['task', 'draggable'], {})
+    if (taskExtraInfo[title].description) {
+        let descriptionElement = createElement('div', [taskExtraInfo[title].description], ['info'], {})
+        appendElement(newTaskElement, descriptionElement)
+    }
+    if (taskExtraInfo[title].priority) {
+        let priorityElement = createElement('div', [taskExtraInfo[title].priority], ['info'], {})
+        appendElement(newTaskElement, priorityElement)
+    }
+    if (taskExtraInfo[title].deadline) {
+        let deadlineElement = createElement('div', [taskExtraInfo[title].deadline], ['info'], {})
+        appendElement(newTaskElement, deadlineElement)
+    }
+    if (taskExtraInfo[title].timeEstimated) {
+        let timeEstimatedElement = createElement('div', [taskExtraInfo[title].timeEstimated], ['info'], {})
+        appendElement(newTaskElement, timeEstimatedElement)
+    }
+    if (taskExtraInfo[title].timeEstimated) {
+        let parentTaskElement = createElement('div', [taskExtraInfo[title].parentTask], ['info'], {})
+        appendElement(newTaskElement, parentTaskElement)
+    }
     if (state === 'todo') appendElement('toDoTasks', newTaskElement)
     if (state === 'in-progress') appendElement('inProgressTasks', newTaskElement)
     if (state === 'done') appendElement('doneTasks', newTaskElement)
@@ -398,6 +415,8 @@ function handleSearchKeyup() {
 async function handleLoad() {
     let response = await loadData()
     tasks = response.tasks
+    console.log(response)
+    // taskExtraInfo = response.taskExtraInfo
     sendToLocal()
     displayElements()
 }
@@ -424,6 +443,7 @@ async function saveData() {
 
     let tasksTosend = {}
     tasksTosend.tasks = tasks
+    tasksTosend.taskExtraInfo = taskExtraInfo
     let response = await fetch('https://json-bins.herokuapp.com/bin/614b11e14021ac0e6c080cdf', {
         method: 'PUT',
         headers: {
