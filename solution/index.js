@@ -42,11 +42,20 @@ function handleaddToDoTask() {
         alert('empty input')
         return null
     }
+    if (isThereATask(document.getElementById('add-to-do-task').value)) {
+        alert('you cant have 2 tasks with the same name')
+        return null
+    }
+
     addTask(getInputInfo('add-to-do-task'), 'todo')
 }
 function handleaddInProgressTask() {
     if (document.getElementById('add-in-progress-task').value === '') {
         alert('empty input')
+        return null
+    }
+    if (isThereATask(document.getElementById('add-in-progress-task').value)) {
+        alert('you cant have 2 tasks with the same name')
         return null
     }
     addTask(getInputInfo('add-in-progress-task'), 'in-progress')
@@ -56,13 +65,84 @@ function handleaddDoneTask() {
         alert('empty input')
         return null
     }
+    if (isThereATask(document.getElementById('add-done-task').value)) {
+        alert('you cant have 2 tasks with the same name')
+        return null
+    }
     addTask(getInputInfo('add-done-task'), 'done')
+}
+function isThereATask(taskName) {
+    //good only for make a new a not for rename!
+    for (let task of tasks.todo) {
+        if (task === taskName) {
+            return true
+        }
+    }
+    for (let task of tasks['in-progress']) {
+        if (task === taskName) {
+            return true
+        }
+    }
+
+    for (let task of tasks.done) {
+        if (task === taskName) {
+            return true
+        }
+    }
+    return false
+}
+function isThereATaskForRename(taskName) {
+    let i = 0
+    for (let task of tasks.todo) {
+        if (task === taskName) {
+            i++
+        }
+    }
+    for (let task of tasks['in-progress']) {
+        if (task === taskName) {
+            i++
+        }
+    }
+
+    for (let task of tasks.done) {
+        if (task === taskName) {
+            i++
+        }
+    }
+
+    return i === 2 ? true : false //steel not good!
 }
 
 //move task
 function moveTask(taskName, target) {
     removeTask(taskName)
     addTask(taskName, target)
+}
+//rename
+function rename(oldName, newName) {
+    let i = 0
+    for (let task of tasks.todo) {
+        if (task === oldName) {
+            tasks['todo'].splice(i, 1, newName)
+        }
+        i++
+    }
+    i = 0
+    for (let task of tasks['in-progress']) {
+        if (task === oldName) {
+            tasks['in-progress'].splice(i, 1, newName)
+        }
+        i++
+    }
+    i = 0
+    for (let task of tasks.done) {
+        if (task === oldName) {
+            tasks['done'].splice(i, 1, newName)
+        }
+        i++
+    }
+    sendToLocal()
+    displayElements()
 }
 //remove
 function removeTask(taskName) {
@@ -102,7 +182,7 @@ function createElement(tagname, children = [], classes = [], attributes, events)
         if (typeof child === 'string' || typeof child === 'number') {
             child = document.createTextNode(child)
         }
-        el.appendChild(child)
+        el.appendChild(child) //dosent work!
     }
 
     //classes
@@ -134,9 +214,12 @@ function appendElement(parentId, element) {
 function createTaskElement(taskName, state) {
     //uses createElement to creat an task elment
     //appends it to the match ul
+    const newNameInput = createElement('input', [], ['hide'], { type: 'text', placeholder: taskName })
+    let newTaskElement = createElement('li', [newNameInput], ['task'], {})
 
-    let newTaskElement = createElement('li', [], ['task'], {})
+    newNameInput.value = taskName
     newTaskElement.innerText = taskName
+    newTaskElement.appendChild(newNameInput)
 
     if (state === 'todo') appendElement('toDoTasks', newTaskElement)
     if (state === 'in-progress') appendElement('inProgressTasks', newTaskElement)
@@ -190,12 +273,13 @@ document.getElementById('doneTasks').addEventListener('mouseleave', mouseleavePa
 document.getElementById('toDoTasks').addEventListener('dblclick', handleDubleClick)
 document.getElementById('inProgressTasks').addEventListener('dblclick', handleDubleClick)
 document.getElementById('doneTasks').addEventListener('dblclick', handleDubleClick)
-document.getElementById('toDoTasks').addEventListener('blur', handleBlur)
-document.getElementById('inProgressTasks').addEventListener('blur', handleBlur)
-document.getElementById('doneTasks').addEventListener('blur', handleBlur)
+// document.getElementById('toDoTasks').addEventListener('blur', handleBlur)
+// document.getElementById('inProgressTasks').addEventListener('blur', handleBlur)
+// document.getElementById('doneTasks').addEventListener('blur', handleBlur)
 
 let correntTaskBelow = null
 let correntTaskElementBelow = null
+let wasJustFocused = null
 
 function mouseOverParent(e) {
     //when the mouse over parent
@@ -213,16 +297,30 @@ function mouseOverParent(e) {
     }
 }
 function handleDubleClick(event) {
-    console.log(correntTaskBelow)
-    //make the name --> input with a placeholder(maybe import from mp3-dom)
-    //make it focus.
-    correntTaskElementBelow.focus()
+    //document.removeEventListener('keydown', handleKeyDown) //stop listen to keydown.
+    correntTaskElementBelow.lastChild.addEventListener('blur', handleBlur)
+    correntTaskElementBelow.lastChild.classList.toggle('hide')
+    correntTaskElementBelow.lastChild.focus()
+    wasJustFocused = correntTaskElementBelow
 }
 function handleBlur(event) {
-    console.log(correntTaskBelow)
+    //document.addEventListener('keydown', handleKeyDown)
+    if (wasJustFocused.lastChild.value === '') {
+        alert('empty input')
+        wasJustFocused.lastChild.classList.add('hide')
+        return
+    }
+    if (isThereATaskForRename(wasJustFocused.lastChild.value)) {
+        alert('there is already a task named like that')
+        wasJustFocused.lastChild.classList.add('hide')
+        return
+    }
+
+    rename(wasJustFocused.innerText, wasJustFocused.lastChild.value)
+    wasJustFocused.lastChild.classList.toggle('hide')
 }
 function handleKeyDown(keyDownEvent) {
-    keyDownEvent.preventDefault()
+    //keyDownEvent.preventDefault()
     if (keyDownEvent.altKey) {
         if (keyDownEvent.key === '1') {
             moveTask(correntTaskBelow, 'todo')
