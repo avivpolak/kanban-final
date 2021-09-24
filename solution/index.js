@@ -42,10 +42,10 @@ function handleaddToDoTask() {
         alert('empty input')
         return null
     }
-    if (isThereATask(document.getElementById('add-to-do-task').value)) {
-        alert('you cant have 2 tasks with the same name')
-        return null
-    }
+    // if (isThereATask(document.getElementById('add-to-do-task').value)) {
+    //     alert('you cant have 2 tasks with the same name')
+    //     return null
+    // }
 
     addTask(getInputInfo('add-to-do-task'), 'todo')
 }
@@ -54,10 +54,10 @@ function handleaddInProgressTask() {
         alert('empty input')
         return null
     }
-    if (isThereATask(document.getElementById('add-in-progress-task').value)) {
-        alert('you cant have 2 tasks with the same name')
-        return null
-    }
+    // if (isThereATask(document.getElementById('add-in-progress-task').value)) {
+    //     alert('you cant have 2 tasks with the same name')
+    //     return null
+    // }
     addTask(getInputInfo('add-in-progress-task'), 'in-progress')
 }
 function handleaddDoneTask() {
@@ -65,10 +65,10 @@ function handleaddDoneTask() {
         alert('empty input')
         return null
     }
-    if (isThereATask(document.getElementById('add-done-task').value)) {
-        alert('you cant have 2 tasks with the same name')
-        return null
-    }
+    // if (isThereATask(document.getElementById('add-done-task').value)) {
+    //     alert('you cant have 2 tasks with the same name')
+    //     return null
+    // }
     addTask(getInputInfo('add-done-task'), 'done')
 }
 function isThereATask(taskName) {
@@ -394,13 +394,9 @@ function displayFounds(found) {
     }
 }
 
-document.getElementById('search').addEventListener('keydown', handleSearchKeydown)
+document.getElementById('search').addEventListener('keyup', handleSearchKeyup)
 
-function handleSearchKeydown() {
-    document.getElementById('search').addEventListener('keyup', handleSearchKeyup)
-}
 function handleSearchKeyup() {
-    console.log(document.getElementById('search').value)
     displayFounds(searchByQuery(document.getElementById('search').value))
 }
 
@@ -408,7 +404,7 @@ document.getElementById('load-btn').addEventListener('click', handleLoad)
 async function handleLoad() {
     let response = await loadData()
     tasks = response.tasks
-    sendToLocal()
+
     displayElements()
 }
 
@@ -420,51 +416,36 @@ async function loadData() {
         return null
     }
 }
+
+document.getElementById('save-btn').addEventListener('click', handleSave)
+async function handleSave() {
+    await saveData()
+    sendToLocal()
+    displayElements()
+}
+
 async function saveData() {
     //-->sends post to "https://json-bins.herokuapp.com/bin/614b11e14021ac0e6c080cdf".
     //-->gets response.
 
-    const response = await fetch('https://json-bins.herokuapp.com/bin/614b11e14021ac0e6c080cdf', {
-        method: 'POST',
+    let tasksTosend = {}
+    tasksTosend.tasks = tasks
+    let response = await fetch('https://json-bins.herokuapp.com/bin/614b11e14021ac0e6c080cdf', {
+        method: 'PUT',
         headers: {
             Accept: 'application/json',
             'Content-Type': 'application/json',
-            Authorization: '614b11e14021ac0e6c080cdf',
         },
-        body: JSON.stringify(tasks),
+        body: JSON.stringify(tasksTosend),
     })
-    if (response.status > 400) {
-        //response is having a kind of problem.
-        document.getElementById('errorBar').innerText = response.status + ':' + response.statusText
-    }
+    //if (response.status > 400) {
+    //response is having a kind of problem.
+    document.getElementById('errorBar').innerText = response.status + ':' + response.statusText
+    //}
     try {
         const result = await response.json()
         return result
     } catch {
         return null
     }
-}
-
-function postAjax(url, data, success) {
-    var params =
-        typeof data == 'string'
-            ? data
-            : Object.keys(data)
-                  .map(function (k) {
-                      return encodeURIComponent(k) + '=' + encodeURIComponent(data[k])
-                  })
-                  .join('&')
-
-    var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP')
-    xhr.open('POST', url)
-    xhr.onreadystatechange = function () {
-        if (xhr.readyState > 3 && xhr.status == 200) {
-            success(xhr.responseText)
-        }
-    }
-    xhr.setRequestHeader('Content-Type', 'application/json')
-    xhr.setRequestHeader('Accept', 'application/json')
-    xhr.setRequestHeader('id', '614b11e14021ac0e6c080cdf')
-    xhr.send(params)
-    return xhr
 }
