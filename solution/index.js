@@ -17,9 +17,7 @@ if (!localStorage.taskExtraInfo) {
 
 displayElements()
 //making the bottons work
-document.getElementById('submit-add-to-do').addEventListener('click', handleaddToDoTask)
-document.getElementById('submit-add-in-progress').addEventListener('click', handleaddInProgressTask)
-document.getElementById('submit-add-done').addEventListener('click', handleaddDoneTask)
+document.getElementById('addTask').addEventListener('click', handleaddTask)
 
 //other
 function getInputInfo(inputId) {
@@ -35,6 +33,32 @@ function sendToLocal() {
     localStorage.setItem('tasks', JSON.stringify(tasks))
     localStorage.setItem('taskExtraInfo', JSON.stringify(taskExtraInfo))
 }
+//add section
+function handleaddTask() {
+    if (
+        document.getElementById('title').value === '' ||
+        document.getElementById('description').value === '' ||
+        document.getElementById('priority').value === '' ||
+        document.getElementById('deadline').value === '' ||
+        document.getElementById('timeEstimated').value === '' ||
+        document.getElementById('parentTask').value === ''
+    ) {
+        alert('empty input')
+        return null
+    }
+    if (howManyTasksHaveThatName(document.getElementById('title').value) > 0) {
+        alert('you cant have 2 tasks with the same name')
+        return null
+    }
+    manageAdd(document.getElementById('title').value, document.getElementById('state').value)
+}
+function manageAdd(title, state) {
+    console.log(title)
+    addExtra(title)
+    addTask(title, state)
+    console.log(tasks)
+    console.log(taskExtraInfo)
+}
 function addExtra(title) {
     taskExtraInfo[title] = {}
     taskExtraInfo[title].description = document.getElementById('description').value
@@ -43,51 +67,35 @@ function addExtra(title) {
     taskExtraInfo[title].timeEstimated = document.getElementById('timeEstimated').value
     taskExtraInfo[title].parentTask = document.getElementById('parentTask').value
 }
-function manageAdd(title, state) {
-    console.log(title)
-    addExtra(title)
-    addTask(title, state)
-}
-//add section
+
 function addTask(title, state) {
     tasks[state].unshift(title)
     sendToLocal()
     displayElements()
 }
 
-function handleaddToDoTask() {
-    if (document.getElementById('add-to-do-task').value === '') {
-        alert('empty input')
-        return null
-    }
-    if (howManyTasksHaveThatName(document.getElementById('add-to-do-task').value) > 0) {
-        alert('you cant have 2 tasks with the same name')
-        return null
-    }
-    manageAdd(document.getElementById('add-to-do-task').value, 'todo')
-}
-function handleaddInProgressTask() {
-    if (document.getElementById('add-in-progress-task').value === '') {
-        alert('empty input')
-        return null
-    }
-    if (howManyTasksHaveThatName(document.getElementById('add-in-progress-task').value) > 0) {
-        alert('you cant have 2 tasks with the same name')
-        return null
-    }
-    addTask(getInputInfo('add-in-progress-task'), 'in-progress')
-}
-function handleaddDoneTask() {
-    if (document.getElementById('add-done-task').value === '') {
-        alert('empty input')
-        return null
-    }
-    if (howManyTasksHaveThatName(document.getElementById('add-done-task').value) > 0) {
-        alert('you cant have 2 tasks with the same name')
-        return null
-    }
-    addTask(getInputInfo('add-done-task'), 'done')
-}
+// function handleaddInProgressTask() {
+//     if (document.getElementById('add-in-progress-task').value === '') {
+//         alert('empty input')
+//         return null
+//     }
+//     if (howManyTasksHaveThatName(document.getElementById('add-in-progress-task').value) > 0) {
+//         alert('you cant have 2 tasks with the same name')
+//         return null
+//     }
+//     addTask(getInputInfo('add-in-progress-task'), 'in-progress')
+// }
+// function handleaddDoneTask() {
+//     if (document.getElementById('add-done-task').value === '') {
+//         alert('empty input')
+//         return null
+//     }
+//     if (howManyTasksHaveThatName(document.getElementById('add-done-task').value) > 0) {
+//         alert('you cant have 2 tasks with the same name')
+//         return null
+//     }
+//     addTask(getInputInfo('add-done-task'), 'done')
+// }
 
 function howManyTasksHaveThatName(title) {
     let i = 0
@@ -205,35 +213,41 @@ function createElement(tagname, children = [], classes = [], attributes, events)
 }
 function appendElement(parentId, element) {
     //appends element child to parent
-
+    console.log(parentId)
     document.getElementById(parentId).appendChild(element)
 }
 
 function createTaskElement(title, state) {
     //uses createElement to creat an task elment
     //appends it to the match ul
-
-    let newTaskElement = createElement('li', [title], ['task', 'draggable'], {})
-    if (taskExtraInfo[title].description) {
-        let descriptionElement = createElement('div', [taskExtraInfo[title].description], ['info'], {})
-        appendElement(newTaskElement, descriptionElement)
-    }
-    if (taskExtraInfo[title].priority) {
-        let priorityElement = createElement('div', [taskExtraInfo[title].priority], ['info'], {})
-        appendElement(newTaskElement, priorityElement)
-    }
-    if (taskExtraInfo[title].deadline) {
-        let deadlineElement = createElement('div', [taskExtraInfo[title].deadline], ['info'], {})
-        appendElement(newTaskElement, deadlineElement)
-    }
-    if (taskExtraInfo[title].timeEstimated) {
-        let timeEstimatedElement = createElement('div', [taskExtraInfo[title].timeEstimated], ['info'], {})
-        appendElement(newTaskElement, timeEstimatedElement)
-    }
-    if (taskExtraInfo[title].timeEstimated) {
-        let parentTaskElement = createElement('div', [taskExtraInfo[title].parentTask], ['info'], {})
-        appendElement(newTaskElement, parentTaskElement)
-    }
+    console.log(title, state)
+    // if (taskExtraInfo[title].description) {
+    let descriptionElement = createElement('div', [taskExtraInfo[title].description], ['info'], {})
+    //appendElement(newTaskElement, descriptionElement)
+    // }
+    // if (taskExtraInfo[title].priority) {
+    let priorityElement = createElement('div', [taskExtraInfo[title].priority], ['info'], {})
+    //appendElement(newTaskElement, priorityElement)
+    // }
+    // if (taskExtraInfo[title].deadline) {
+    let deadlineElement = createElement('div', [taskExtraInfo[title].deadline], ['info'], {})
+    //appendElement(newTaskElement, deadlineElement)
+    // }
+    // if (taskExtraInfo[title].timeEstimated) {
+    let timeEstimatedElement = createElement('div', [taskExtraInfo[title].timeEstimated], ['info'], {})
+    //appendElement(newTaskElement, timeEstimatedElement)
+    // }
+    // if (taskExtraInfo[title].timeEstimated) {
+    let parentTaskElement = createElement('div', [taskExtraInfo[title].parentTask], ['info'], {})
+    //appendElement(newTaskElement, parentTaskElement)
+    // }
+    //appendElement('toDoTasks', newTaskElement)
+    let newTaskElement = createElement(
+        'li',
+        [descriptionElement, priorityElement, deadlineElement, timeEstimatedElement, parentTaskElement],
+        ['task', 'draggable'],
+        {}
+    )
     if (state === 'todo') appendElement('toDoTasks', newTaskElement)
     if (state === 'in-progress') appendElement('inProgressTasks', newTaskElement)
     if (state === 'done') appendElement('doneTasks', newTaskElement)
@@ -288,38 +302,37 @@ document.getElementById('doneTasks').addEventListener('mouseleave', mouseleavePa
 document.getElementById('toDoTasks').addEventListener('dblclick', handleDubleClick)
 document.getElementById('inProgressTasks').addEventListener('dblclick', handleDubleClick)
 document.getElementById('doneTasks').addEventListener('dblclick', handleDubleClick)
-// document.getElementById('toDoTasks').addEventListener('blur', handleBlur)
-// document.getElementById('inProgressTasks').addEventListener('blur', handleBlur)
-// document.getElementById('doneTasks').addEventListener('blur', handleBlur)
 
-let correntTaskBelow = null
-let correntTaskElementBelow = null
-let wasJustFocused = null
-let wasJustFocusedOldName = null
+// let correntTaskBelow = null
+// let correntTaskElementBelow = null
+// let wasJustFocused = null
+// let wasJustFocusedOldName = null
 
 function mouseOverParent(e) {
     //when the mouse over parent
     //-->update corrent element below(if its LI)
     document.addEventListener('keydown', handleKeyDown) //start listen to keydown.
 
-    correntTaskBelow = null //an real-time updated object that indicates the the tops element below mouse
-    if (e.target.tagName === 'LI') {
-        correntTaskBelow = e.target.innerText
-    }
+    // correntTaskBelow = null //an real-time updated object that indicates the the tops element below mouse
+    // if (e.target.tagName === 'LI') {
+    //     correntTaskBelow = e.target
+    //     console.log(correntTaskBelow)
+    // }
 
-    correntTaskElementBelow = null //an real-time updated object that indicates the the tops element below mouse
-    if (e.target.tagName === 'LI') {
-        correntTaskElementBelow = e.target
-    }
+    // correntTaskElementBelow = null //an real-time updated object that indicates the the tops element below mouse
+    // if (e.target.tagName === 'LI') {
+    //     correntTaskElementBelow = e.target
+    // }
 }
 function handleDubleClick(event) {
-    correntTaskElementBelow.addEventListener('blur', handleBlur)
+    //console.log(correntTaskElementBelow)
+    event.target.addEventListener('blur', handleBlur)
 
-    correntTaskElementBelow.contentEditable = true
-    wasJustFocusedOldName = correntTaskElementBelow.innerText
-    correntTaskElementBelow.focus()
+    event.target.contentEditable = true
+    //wasJustFocusedOldName = correntTaskElementBelow.innerText
+    event.target.focus()
 
-    wasJustFocused = correntTaskElementBelow
+    //wasJustFocused = correntTaskElementBelow
 }
 function handleBlur(event) {
     wasJustFocused.contentEditable = false
@@ -394,18 +407,18 @@ function searchByQuery(query) {
     return found
 }
 function displayFounds(found) {
-    removeAllchildrens('toDoTasks')
-    removeAllchildrens('inProgressTasks')
-    removeAllchildrens('doneTasks')
-    for (let task of found.todo) {
-        createTodoTaskElement(task)
-    }
-    for (let task of found['in-progress']) {
-        createInProgressTaskElement(task)
-    }
-    for (let task of found.done) {
-        createDoneTaskElement(task)
-    }
+    // removeAllchildrens('toDoTasks')
+    // removeAllchildrens('inProgressTasks')
+    // removeAllchildrens('doneTasks')
+    // for (let task of found.todo) {
+    //     createTodoTaskElement(task)
+    // }
+    // for (let task of found['in-progress']) {
+    //     createInProgressTaskElement(task)
+    // }
+    // for (let task of found.done) {
+    //     createDoneTaskElement(task)
+    // }
 }
 
 function handleSearchKeyup() {

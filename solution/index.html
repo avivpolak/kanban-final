@@ -14,30 +14,37 @@
         <button id="save-btn">save</button>
         <button id="load-btn">load</button>
         <div id="errorBar"></div>
-        <section>
+        <section id="addSection">
+            <label for="state">Choose a state:</label>
+            <select id="state">
+                <option value="todo">to do</option>
+                <option value="in-progress">in-progress</option>
+                <option value="done">done</option>
+            </select>
             <label for="add-to-do-task">title:</label>
-            <input id="add-to-do-task" type="text" placeholder="new to do task" />
+            <input id="title" type="text" placeholder="title" required />
             <label for="description">Description:</label>
-            <input id="description" type="text" placeholder="description" />
+            <input id="description" type="text" placeholder="description" required />
             <label for="priority">Priority:</label>
-            <input id="priority" type="number" placeholder="1-10" />
+            <input id="priority" type="number" placeholder="1-10" required />
             <label for="deadline">Deadline:</label>
-            <input id="deadline" type="date" placeholder="deadline" />
+            <input id="deadline" type="date" placeholder="deadline" required />
             <label for="timeEstimated">Time Estimated:</label>
-            <input id="timeEstimated" type="number" placeholder="days" />
+            <input id="timeEstimated" type="number" placeholder="days" required />
             <label for="parentTask">Parent Task:</label>
-            <input id="parentTask" type="text" placeholder="parentTask" />
-            <button id="submit-add-to-do">submit add to do</button>
+            <input id="parentTask" type="text" placeholder="parentTask" required />
+            <button id="addTask">add task</button>
+        </section>
+        <section>
+            <h2>to do:</h2>
             <ul id="toDoTasks" class="to-do-tasks"></ul>
         </section>
         <section>
-            <input id="add-in-progress-task" type="text" placeholder="new in progress task" />
-            <button id="submit-add-in-progress">submit add in progress</button>
+            <h2>in-progress</h2>
             <ul id="inProgressTasks" class="in-progress-tasks"></ul>
         </section>
         <section>
-            <input id="add-done-task" type="text" placeholder="new done task" />
-            <button id="submit-add-done">submit add done</button>
+            <h2>done</h2>
             <ul id="doneTasks" class="done-tasks"></ul>
         </section>
     </body>
