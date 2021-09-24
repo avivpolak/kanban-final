@@ -410,6 +410,9 @@ async function handleLoad() {
 
 async function loadData() {
     let response = await fetch('https://json-bins.herokuapp.com/bin/614b11e14021ac0e6c080cdf')
+    if (response.status > 400) {
+        document.getElementById('errorBar').innerText = response.status + ':' + response.statusText
+    } else document.getElementById('errorBar').innerText = 'loaded!'
     try {
         return response.json()
     } catch {
@@ -438,14 +441,14 @@ async function saveData() {
         },
         body: JSON.stringify(tasksTosend),
     })
-    //if (response.status > 400) {
-    //response is having a kind of problem.
-    document.getElementById('errorBar').innerText = response.status + ':' + response.statusText
-    //}
-    try {
-        const result = await response.json()
-        return result
-    } catch {
-        return null
-    }
+    if (response.status > 400) {
+        //response is having a kind of problem.
+        document.getElementById('errorBar').innerText = response.status + ':' + response.statusText
+    } else document.getElementById('errorBar').innerText = 'saved!'
+    // try {
+    //     const result = await response.json()
+    //     return result
+    // } catch {
+    //     return null
+    // }
 }
