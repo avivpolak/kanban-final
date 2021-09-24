@@ -1,4 +1,18 @@
 'use strict'
+
+let taskExtraInfo = {
+    task1: {
+        description: 'description task 1',
+        priority: 1,
+        createTime: undefined,
+        deadline: undefined,
+        timeEstimated: undefined,
+        dependsOnTasks: ['task3', 'task22'],
+        parentTask: 'task0',
+        finishTime: undefined,
+    },
+}
+
 if (!localStorage.tasks) {
     //if there is info in local storage use it , otherwise create a new, empty "tasks" & "taskIdcount"
 
@@ -32,8 +46,8 @@ function sendToLocal() {
 }
 
 //add section
-function addTask(taskName, state) {
-    tasks[state].unshift(taskName)
+function addTask(title, state) {
+    tasks[state].unshift(title)
     sendToLocal()
     displayElements()
 }
@@ -73,21 +87,21 @@ function handleaddDoneTask() {
     addTask(getInputInfo('add-done-task'), 'done')
 }
 
-function howManyTasksHaveThatName(taskName) {
+function howManyTasksHaveThatName(title) {
     let i = 0
     for (let task of tasks.todo) {
-        if (task === taskName) {
+        if (task === title) {
             i++
         }
     }
     for (let task of tasks['in-progress']) {
-        if (task === taskName) {
+        if (task === title) {
             i++
         }
     }
 
     for (let task of tasks.done) {
-        if (task === taskName) {
+        if (task === title) {
             i++
         }
     }
@@ -96,9 +110,9 @@ function howManyTasksHaveThatName(taskName) {
 }
 
 //move task
-function moveTask(taskName, target) {
-    removeTask(taskName)
-    addTask(taskName, target)
+function moveTask(title, target) {
+    removeTask(title)
+    addTask(title, target)
 }
 //rename
 function rename(oldName, newName) {
@@ -127,24 +141,24 @@ function rename(oldName, newName) {
     displayElements()
 }
 //remove
-function removeTask(taskName) {
+function removeTask(title) {
     let i = 0
     for (let task of tasks.todo) {
-        if (task === taskName) {
+        if (task === title) {
             tasks['todo'].splice(i, 1)
         }
         i++
     }
     i = 0
     for (let task of tasks['in-progress']) {
-        if (task === taskName) {
+        if (task === title) {
             tasks['in-progress'].splice(i, 1)
         }
         i++
     }
     i = 0
     for (let task of tasks.done) {
-        if (task === taskName) {
+        if (task === title) {
             tasks['done'].splice(i, 1)
         }
         i++
@@ -193,28 +207,28 @@ function appendElement(parentId, element) {
     document.getElementById(parentId).appendChild(element)
 }
 
-function createTaskElement(taskName, state) {
+function createTaskElement(title, state) {
     //uses createElement to creat an task elment
     //appends it to the match ul
-    const newNameInput = createElement('input', [], ['hide'], { type: 'text', placeholder: taskName })
+    const newNameInput = createElement('input', [], ['hide'], { type: 'text', placeholder: title })
     let newTaskElement = createElement('li', [newNameInput], ['task', 'draggable'], {})
 
-    newNameInput.value = taskName
-    newTaskElement.innerText = taskName
+    newNameInput.value = title
+    newTaskElement.innerText = title
     newTaskElement.appendChild(newNameInput)
 
     if (state === 'todo') appendElement('toDoTasks', newTaskElement)
     if (state === 'in-progress') appendElement('inProgressTasks', newTaskElement)
     if (state === 'done') appendElement('doneTasks', newTaskElement)
 }
-function createTodoTaskElement(taskName) {
-    createTaskElement(taskName, 'todo')
+function createTodoTaskElement(title) {
+    createTaskElement(title, 'todo')
 }
-function createInProgressTaskElement(taskName) {
-    createTaskElement(taskName, 'in-progress')
+function createInProgressTaskElement(title) {
+    createTaskElement(title, 'in-progress')
 }
-function createDoneTaskElement(taskName) {
-    createTaskElement(taskName, 'done')
+function createDoneTaskElement(title) {
+    createTaskElement(title, 'done')
 }
 function generateTasks() {
     //uses createTaskElement to create (and append to matching parent) an element for each task object.
