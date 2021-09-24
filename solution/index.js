@@ -43,10 +43,10 @@ function handleaddToDoTask() {
         alert('empty input')
         return null
     }
-    // if (isThereATask(document.getElementById('add-to-do-task').value)) {
-    //     alert('you cant have 2 tasks with the same name')
-    //     return null
-    // }
+    if (howManyTasksHaveThatName(document.getElementById('add-to-do-task').value) > 0) {
+        alert('you cant have 2 tasks with the same name')
+        return null
+    }
 
     addTask(getInputInfo('add-to-do-task'), 'todo')
 }
@@ -55,10 +55,10 @@ function handleaddInProgressTask() {
         alert('empty input')
         return null
     }
-    // if (isThereATask(document.getElementById('add-in-progress-task').value)) {
-    //     alert('you cant have 2 tasks with the same name')
-    //     return null
-    // }
+    if (howManyTasksHaveThatName(document.getElementById('add-in-progress-task').value) > 0) {
+        alert('you cant have 2 tasks with the same name')
+        return null
+    }
     addTask(getInputInfo('add-in-progress-task'), 'in-progress')
 }
 function handleaddDoneTask() {
@@ -66,33 +66,14 @@ function handleaddDoneTask() {
         alert('empty input')
         return null
     }
-    // if (isThereATask(document.getElementById('add-done-task').value)) {
-    //     alert('you cant have 2 tasks with the same name')
-    //     return null
-    // }
+    if (howManyTasksHaveThatName(document.getElementById('add-done-task').value) > 0) {
+        alert('you cant have 2 tasks with the same name')
+        return null
+    }
     addTask(getInputInfo('add-done-task'), 'done')
 }
-function isThereATask(taskName) {
-    //good only for make a new a not for rename!
-    for (let task of tasks.todo) {
-        if (task === taskName) {
-            return true
-        }
-    }
-    for (let task of tasks['in-progress']) {
-        if (task === taskName) {
-            return true
-        }
-    }
 
-    for (let task of tasks.done) {
-        if (task === taskName) {
-            return true
-        }
-    }
-    return false
-}
-function isThereATaskForRename(taskName) {
+function howManyTasksHaveThatName(taskName) {
     let i = 0
     for (let task of tasks.todo) {
         if (task === taskName) {
@@ -111,7 +92,7 @@ function isThereATaskForRename(taskName) {
         }
     }
 
-    return i === 2 ? true : false //steel not good!
+    return i
 }
 
 //move task
@@ -216,7 +197,7 @@ function createTaskElement(taskName, state) {
     //uses createElement to creat an task elment
     //appends it to the match ul
     const newNameInput = createElement('input', [], ['hide'], { type: 'text', placeholder: taskName })
-    let newTaskElement = createElement('li', [newNameInput], ['task'], {})
+    let newTaskElement = createElement('li', [newNameInput], ['task', 'draggable'], {})
 
     newNameInput.value = taskName
     newTaskElement.innerText = taskName
@@ -301,10 +282,8 @@ function mouseOverParent(e) {
     }
 }
 function handleDubleClick(event) {
-    //document.removeEventListener('keydown', handleKeyDown) //stop listen to keydown.
     correntTaskElementBelow.addEventListener('blur', handleBlur)
-    //correntTaskElementBelow.lastChild.classList.toggle('hide')
-    //correntTaskElementBelow.lastChild.focus()
+
     correntTaskElementBelow.contentEditable = true
     wasJustFocusedOldName = correntTaskElementBelow.innerText
     correntTaskElementBelow.focus()
@@ -312,25 +291,24 @@ function handleDubleClick(event) {
     wasJustFocused = correntTaskElementBelow
 }
 function handleBlur(event) {
-    //document.addEventListener('keydown', handleKeyDown)
     wasJustFocused.contentEditable = false
 
     if (wasJustFocused.innerText === '') {
         alert('empty input')
-        //wasJustFocused.lastChild.classList.add('hide')
-        return
+        displayElements()
+        return null
     }
-    if (isThereATaskForRename(wasJustFocused.innerText)) {
+    if (wasJustFocused.innerText === wasJustFocusedOldName) {
+        return null
+    }
+    if (howManyTasksHaveThatName(wasJustFocused.innerText) >= 1) {
         alert('there is already a task named like that')
-        //wasJustFocused.lastChild.classList.add('hide')
-        return
+        displayElements()
+        return null
     }
     rename(wasJustFocusedOldName, wasJustFocused.innerText)
     sendToLocal()
     displayElements()
-    console.log(wasJustFocused.innerText, wasJustFocusedOldName)
-
-    //wasJustFocused.lastChild.classList.toggle('hide')
 }
 function handleKeyDown(keyDownEvent) {
     //keyDownEvent.preventDefault()
@@ -406,7 +384,7 @@ function handleSearchKeyup() {
 async function handleLoad() {
     let response = await loadData()
     tasks = response.tasks
-
+    sendToLocal()
     displayElements()
 }
 
@@ -424,8 +402,6 @@ async function loadData() {
 
 async function handleSave() {
     await saveData()
-    sendToLocal()
-    displayElements()
 }
 
 async function saveData() {
