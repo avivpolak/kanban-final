@@ -16,6 +16,7 @@ displayElements()
 document.getElementById('submit-add-to-do').addEventListener('click', handleaddToDoTask)
 document.getElementById('submit-add-in-progress').addEventListener('click', handleaddInProgressTask)
 document.getElementById('submit-add-done').addEventListener('click', handleaddDoneTask)
+
 //other
 function getInputInfo(inputId) {
     //returns this input value
@@ -263,7 +264,9 @@ function displayElements() {
     generateTasks()
 }
 //events handaling
-
+document.getElementById('save-btn').addEventListener('click', handleSave)
+document.getElementById('load-btn').addEventListener('click', handleLoad)
+document.getElementById('search').addEventListener('keyup', handleSearchKeyup)
 document.getElementById('toDoTasks').addEventListener('mouseover', mouseOverParent)
 document.getElementById('inProgressTasks').addEventListener('mouseover', mouseOverParent)
 document.getElementById('doneTasks').addEventListener('mouseover', mouseOverParent)
@@ -358,8 +361,10 @@ function searchByQuery(query) {
         'in-progress': [],
         done: [],
     }
+    console.log(tasks.todo)
     for (let task of tasks.todo) {
         //searching for matching todo.
+        console.log(task)
         if (task.toLowerCase().includes(lowerCasedQuery)) {
             found.todo.push(task)
         }
@@ -394,13 +399,10 @@ function displayFounds(found) {
     }
 }
 
-document.getElementById('search').addEventListener('keyup', handleSearchKeyup)
-
 function handleSearchKeyup() {
     displayFounds(searchByQuery(document.getElementById('search').value))
 }
 
-document.getElementById('load-btn').addEventListener('click', handleLoad)
 async function handleLoad() {
     let response = await loadData()
     tasks = response.tasks
@@ -420,7 +422,6 @@ async function loadData() {
     }
 }
 
-document.getElementById('save-btn').addEventListener('click', handleSave)
 async function handleSave() {
     await saveData()
     sendToLocal()
@@ -445,10 +446,4 @@ async function saveData() {
         //response is having a kind of problem.
         document.getElementById('errorBar').innerText = response.status + ':' + response.statusText
     } else document.getElementById('errorBar').innerText = 'saved!'
-    // try {
-    //     const result = await response.json()
-    //     return result
-    // } catch {
-    //     return null
-    // }
 }
