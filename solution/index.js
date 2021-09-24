@@ -280,6 +280,7 @@ document.getElementById('doneTasks').addEventListener('dblclick', handleDubleCli
 let correntTaskBelow = null
 let correntTaskElementBelow = null
 let wasJustFocused = null
+let wasJustFocusedOldName = null
 
 function mouseOverParent(e) {
     //when the mouse over parent
@@ -298,26 +299,35 @@ function mouseOverParent(e) {
 }
 function handleDubleClick(event) {
     //document.removeEventListener('keydown', handleKeyDown) //stop listen to keydown.
-    correntTaskElementBelow.lastChild.addEventListener('blur', handleBlur)
-    correntTaskElementBelow.lastChild.classList.toggle('hide')
-    correntTaskElementBelow.lastChild.focus()
+    correntTaskElementBelow.addEventListener('blur', handleBlur)
+    //correntTaskElementBelow.lastChild.classList.toggle('hide')
+    //correntTaskElementBelow.lastChild.focus()
+    correntTaskElementBelow.contentEditable = true
+    wasJustFocusedOldName = correntTaskElementBelow.innerText
+    correntTaskElementBelow.focus()
+
     wasJustFocused = correntTaskElementBelow
 }
 function handleBlur(event) {
     //document.addEventListener('keydown', handleKeyDown)
-    if (wasJustFocused.lastChild.value === '') {
-        alert('empty input')
-        wasJustFocused.lastChild.classList.add('hide')
-        return
-    }
-    if (isThereATaskForRename(wasJustFocused.lastChild.value)) {
-        alert('there is already a task named like that')
-        wasJustFocused.lastChild.classList.add('hide')
-        return
-    }
+    wasJustFocused.contentEditable = false
 
-    rename(wasJustFocused.innerText, wasJustFocused.lastChild.value)
-    wasJustFocused.lastChild.classList.toggle('hide')
+    if (wasJustFocused.innerText === '') {
+        alert('empty input')
+        //wasJustFocused.lastChild.classList.add('hide')
+        return
+    }
+    if (isThereATaskForRename(wasJustFocused.innerText)) {
+        alert('there is already a task named like that')
+        //wasJustFocused.lastChild.classList.add('hide')
+        return
+    }
+    rename(wasJustFocusedOldName, wasJustFocused.innerText)
+    sendToLocal()
+    displayElements()
+    console.log(wasJustFocused.innerText, wasJustFocusedOldName)
+
+    //wasJustFocused.lastChild.classList.toggle('hide')
 }
 function handleKeyDown(keyDownEvent) {
     //keyDownEvent.preventDefault()
@@ -335,4 +345,126 @@ function handleKeyDown(keyDownEvent) {
 }
 function mouseleaveParent() {
     document.removeEventListener('keydown', handleKeyDown) //stop listen to keydown.
+}
+
+function searchByQuery(query) {
+    //Parameters:QUERY WORD OR SENTNCE.
+    //Returns: CLOSEST PLAYLIST/SONG TO IT.
+    if (query === '') return tasks
+
+    let lowerCasedQuery = query.toLowerCase()
+    let found = {
+        todo: [],
+        'in-progress': [],
+        done: [],
+    }
+    for (let task of tasks.todo) {
+        //searching for matching todo.
+        if (task.toLowerCase().includes(lowerCasedQuery)) {
+            found.todo.push(task)
+        }
+    }
+    for (let task of tasks['in-progress']) {
+        //searching for matching todo.
+        if (task.toLowerCase().includes(lowerCasedQuery)) {
+            found['in-progress'].push(task)
+        }
+    }
+    for (let task of tasks.done) {
+        //searching for matching todo.
+        if (task.toLowerCase().includes(lowerCasedQuery)) {
+            found.done.push(task)
+        }
+    }
+
+    return found
+}
+function displayFounds(found) {
+    removeAllchildrens('toDoTasks')
+    removeAllchildrens('inProgressTasks')
+    removeAllchildrens('doneTasks')
+    for (let task of found.todo) {
+        createTodoTaskElement(task)
+    }
+    for (let task of found['in-progress']) {
+        createInProgressTaskElement(task)
+    }
+    for (let task of found.done) {
+        createDoneTaskElement(task)
+    }
+}
+
+document.getElementById('search').addEventListener('keydown', handleSearchKeydown)
+
+function handleSearchKeydown() {
+    document.getElementById('search').addEventListener('keyup', handleSearchKeyup)
+}
+function handleSearchKeyup() {
+    console.log(document.getElementById('search').value)
+    displayFounds(searchByQuery(document.getElementById('search').value))
+}
+
+document.getElementById('load-btn').addEventListener('click', handleLoad)
+async function handleLoad() {
+    let response = await loadData()
+    tasks = response.tasks
+    sendToLocal()
+    displayElements()
+}
+
+async function loadData() {
+    let response = await fetch('https://json-bins.herokuapp.com/bin/614b11e14021ac0e6c080cdf')
+    try {
+        return response.json()
+    } catch {
+        return null
+    }
+}
+async function saveData() {
+    //-->sends post to "https://json-bins.herokuapp.com/bin/614b11e14021ac0e6c080cdf".
+    //-->gets response.
+
+    const response = await fetch('https://json-bins.herokuapp.com/bin/614b11e14021ac0e6c080cdf', {
+        method: 'POST',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+            Authorization: '614b11e14021ac0e6c080cdf',
+        },
+        body: JSON.stringify(tasks),
+    })
+    if (response.status > 400) {
+        //response is having a kind of problem.
+        document.getElementById('errorBar').innerText = response.status + ':' + response.statusText
+    }
+    try {
+        const result = await response.json()
+        return result
+    } catch {
+        return null
+    }
+}
+
+function postAjax(url, data, success) {
+    var params =
+        typeof data == 'string'
+            ? data
+            : Object.keys(data)
+                  .map(function (k) {
+                      return encodeURIComponent(k) + '=' + encodeURIComponent(data[k])
+                  })
+                  .join('&')
+
+    var xhr = window.XMLHttpRequest ? new XMLHttpRequest() : new ActiveXObject('Microsoft.XMLHTTP')
+    xhr.open('POST', url)
+    xhr.onreadystatechange = function () {
+        if (xhr.readyState > 3 && xhr.status == 200) {
+            success(xhr.responseText)
+        }
+    }
+    xhr.setRequestHeader('Content-Type', 'application/json')
+    xhr.setRequestHeader('Accept', 'application/json')
+    xhr.setRequestHeader('id', '614b11e14021ac0e6c080cdf')
+    xhr.send(params)
+    return xhr
 }
