@@ -630,63 +630,125 @@ async function saveData() {
 }
 
 //drag&drop
-let currentDroppable = null
+function onDragStart() {
+    return false
+}
 
-ball.onmousedown = function (event) {
-    let shiftX = event.clientX - ball.getBoundingClientRect().left
-    let shiftY = event.clientY - ball.getBoundingClientRect().top
+function clickDrugAndDropHandler(event) {
+    const target = event.target
 
-    ball.style.position = 'absolute'
-    ball.style.zIndex = 1000
-    document.body.append(ball)
+    event.preventDefault()
 
-    moveAt(event.pageX, event.pageY)
+    mouseDown = true
 
-    function moveAt(pageX, pageY) {
-        ball.style.left = pageX - shiftX + 'px'
-        ball.style.top = pageY - shiftY + 'px'
-    }
-
-    function onMouseMove(event) {
-        moveAt(event.pageX, event.pageY)
-
-        ball.hidden = true
-        let elemBelow = document.elementFromPoint(event.clientX, event.clientY)
-        ball.hidden = false
-
-        if (!elemBelow) return
-
-        let droppableBelow = elemBelow.closest('.droppable')
-        if (currentDroppable != droppableBelow) {
-            if (currentDroppable) {
-                // null when we were not over a droppable before this event
-                leaveDroppable(currentDroppable)
-            }
-            currentDroppable = droppableBelow
-            if (currentDroppable) {
-                // null if we're not coming over a droppable now
-                // (maybe just left the droppable)
-                enterDroppable(currentDroppable)
-            }
+    function onMouseUp(event) {
+        if (event.target === target) {
+            mouseDown = false
         }
     }
 
-    document.addEventListener('mousemove', onMouseMove)
+    document.addEventListener('mouseup', onMouseUp)
 
-    ball.onmouseup = function () {
-        document.removeEventListener('mousemove', onMouseMove)
-        ball.onmouseup = null
+    setTimeout(() => {
+        if (dblClicked === true || mouseDown === false) return
+
+        event.preventDefault()
+
+        target.classList.add('taskDrag')
+
+        let shiftX = event.clientX - target.getBoundingClientRect().left
+        let shiftY = event.clientY - target.getBoundingClientRect().top
+
+        target.style.position = 'absolute'
+        target.style.zIndex = 1000
+        document.body.append(target)
+
+        moveAt(event.pageX, event.pageY)
+
+        // moves the ball at (pageX, pageY) coordinates
+        // taking initial shifts into account
+        function moveAt(pageX, pageY) {
+            target.style.left = pageX - shiftX + 'px'
+            target.style.top = pageY - shiftY + 'px'
+        }
+
+        let currentDroppable = null
+
+        function onMouseMove(event) {
+            moveAt(event.pageX, event.pageY)
+
+            target.style.display = 'none'
+            let elemBelow = document.elementFromPoint(event.clientX, event.clientY)
+            target.style.display = ''
+
+            // mousemove events may trigger out of the window (when the ball is dragged off-screen)
+            // if clientX/clientY are out of the window, then elementFromPoint returns null
+            if (!elemBelow) return
+
+            // potential droppable are labeled with the class "droppable" (can be other logic)
+            let droppableBelow = elemBelow.closest('.droppable')
+
+            if (currentDroppable != droppableBelow) {
+                // we're flying in or out...
+                // note: both values can be null
+                //   currentDroppable=null if we were not over a droppable before this event (e.g over an empty space)
+                //   droppableBelow=null if we're not over a droppable now, during this event
+
+                if (currentDroppable) {
+                    // the logic to process "flying out" of the droppable (remove highlight)
+                    leaveDroppable(currentDroppable)
+                }
+                currentDroppable = droppableBelow
+                if (currentDroppable) {
+                    // the logic to process "flying in" of the droppable
+                    enterDroppable(currentDroppable)
+                }
+            }
+        }
+
+        // move the ball on mousemove
+        document.addEventListener('mousemove', onMouseMove)
+
+        // drop the ball, remove unneeded handlers
+        target.onmouseup = function () {
+            if (aboveDroppable) {
+                if (currentDroppable.tagName === 'LI') {
+                    const newListId = getAncestorSectionListId(currentDroppable)
+                    const taskId = Number(target.dataset.originalTaskId)
+                    const droppableTaskId = getTaskFromLi(currentDroppable).id
+                    const droppableIndex = board.getTaskIndex(droppableTaskId)
+
+                    moveTask(taskId, newListId, droppableIndex + 1)
+                } else {
+                    const newListId = getAncestorSectionListId(currentDroppable)
+                    const taskId = Number(target.dataset.originalTaskId)
+
+                    moveTask(taskId, newListId)
+                }
+            }
+
+            document.removeEventListener('mousemove', onMouseMove)
+            target.onmouseup = null
+            target.remove()
+            renderBoard()
+        }
+    }, 300)
+}
+
+let aboveDroppable = false
+
+function enterDroppable(droppableElement) {
+    aboveDroppable = true
+
+    if (droppableElement.tagName === 'LI') {
+        droppableElement.classList.add('below-drag')
     }
 }
 
-function enterDroppable(elem) {
-    elem.style.background = 'pink'
-}
+function leaveDroppable(droppableElement) {
+    aboveDroppable = false
 
-function leaveDroppable(elem) {
-    elem.style.background = ''
-}
-
-ball.ondragstart = function () {
-    return false
+    if (droppableElement.tagName === 'LI') {
+        droppableElement.classList.remove('below-drag')
+    }
 }
