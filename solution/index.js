@@ -63,6 +63,9 @@ function importance(title) {
     }
     return
 }
+function howBusy() {
+    tasks
+}
 function colorFromImportance(importance) {
     //when importance is more than 10 , you are for sure late.
     //red = 7-10 so it will be red.
@@ -76,6 +79,12 @@ function colorFromImportance(importance) {
 }
 
 //other
+function setTheme() {
+    const themeName = document.getElementById('theme').value
+    localStorage.setItem('theme', themeName)
+    document.documentElement.className = themeName
+}
+document.getElementById('submitTheme').addEventListener('click', setTheme)
 function getInputInfo(inputId) {
     //returns this input value
     //set input value to "".

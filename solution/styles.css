@@ -1,13 +1,41 @@
 body {
-    background-color: cyan;
+    background-color: var(--font-color);
+    color: var(--color-primary);
+    transition: 5s;
 }
+
 .task {
-    background-color: crimson;
+    background-color: var(--color-secondary);
     height: 30px;
     margin: 10px;
 }
 .hide {
     display: none;
+}
+.subMainSec {
+    background-color: var(--color-accent);
+    border-radius: 17px;
+    margin-left: 15px;
+    margin-right: 15px;
+    padding: 20px;
+    border: var(--color-third);
+    border-width: 10px;
+    border-style: solid;
+    box-shadow: 10px 15px 30px #000000;
+}
+.info {
+    border-radius: 7px;
+    padding: 20px;
+    background-color: #ffffff;
+}
+.task {
+    border-radius: 7px;
+    padding: 2px;
+}
+.mainSec {
+    width: 100%;
+    display: flex;
+    justify-content: center;
 }
 section {
     margin-top: 5%;
@@ -43,12 +71,157 @@ span {
     margin-right: 40%;
 }
 
-/* not mine */
+/* colors */
+
+.theme-purple {
+    --color-primary: #501b1d;
+    --color-secondary: #83677b;
+    --color-third: #64485c;
+    --color-accent: #2e1114;
+    --font-color: #adadad;
+}
+.theme-creative {
+    --color-primary: #d79922;
+    --color-secondary: #efe2ba;
+    --color-third: #f13c20;
+    --color-accent: #4056a1;
+    --font-color: #c5cbe3;
+}
+.theme-inviting {
+    --color-primary: #e7717d;
+    --color-secondary: #c2cad0;
+    --color-third: #c2b9b0;
+    --color-accent: #7e685a;
+    --font-color: #afd275;
+}
+.theme-sleek {
+    --color-primary: #2c3531;
+    --color-secondary: #116466;
+    --color-third: #d9b08c;
+    --color-accent: #ffcb9a;
+    --font-color: #d1e8e2;
+}
+.theme-audacious {
+    --color-primary: #272727;
+    --color-secondary: #747474;
+    --color-third: #ff652f;
+    --color-accent: #ffe400;
+    --font-color: #14a76c;
+}
+.theme-traditional {
+    --color-primary: #88bdbc;
+    --color-secondary: #254e58;
+    --color-third: #112d32;
+    --color-accent: #4f4a41;
+    --font-color: #6e6658;
+}
+.theme-love {
+    --color-primary: #a1c3d1;
+    --color-secondary: #b39bc8;
+    --color-third: #f0ebf4;
+    --color-accent: #f172a1;
+    --font-color: #e64398;
+}
+.theme-striking {
+    --color-primary: #172605;
+    --color-secondary: #176521;
+    --color-third: #53900f;
+    --color-accent: #a4a71e;
+    --font-color: #d6ce15;
+}
+/* button */
+
+.container:hover {
+    background-color: var(--color-primary);
+    transition: all 0.3s ease-in-out;
+}
+
+.container {
+    outline: none;
+    cursor: pointer;
+    background: none;
+    transition: 0.5s;
+    border-radius: 5px;
+
+    border-style: solid;
+    color: white;
+    transform: scale(1.1);
+}
+
+/* select option */
+.select {
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    width: 250px;
+    height: 40px;
+}
+
+.option {
+    padding: 0 30px 0 10px;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    background: #333;
+    border-top: #222 solid 1px;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    pointer-events: none;
+    order: 2;
+    z-index: 1;
+    transition: background 0.4s ease-in-out;
+    box-sizing: border-box;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+.option:hover {
+    background: #666;
+}
+
+.select:focus .option {
+    position: relative;
+    pointer-events: all;
+}
+
+input:checked + label {
+    order: 1;
+    z-index: 2;
+    background: #666;
+    border-top: none;
+    position: relative;
+}
+
+input:checked + label:after {
+    content: '';
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 5px solid white;
+    position: absolute;
+    right: 10px;
+    top: calc(50% - 2.5px);
+    pointer-events: none;
+    z-index: 3;
+}
+
+input:checked + label:before {
+    position: absolute;
+    right: 0;
+    height: 40px;
+    width: 40px;
+    content: '';
+    background: #666;
+}
+/* form not mine */
+
 .form {
     max-width: 400px;
     margin: 50px auto;
     background: #fff;
-    border-radius: 2px;
+    border-radius: 7px;
     padding: 20px;
     font-family: Georgia, 'Times New Roman', Times, serif;
 }
