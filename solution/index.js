@@ -44,6 +44,14 @@ function showExtraDone() {
 }
 //addind events to inputs
 
+function daysleft(title) {
+    const deadline = new Date(taskExtraInfo[title].deadline)
+    const presentDate = new Date()
+    const oneDay = 1000 * 60 * 60 * 24
+    let result = Math.round(deadline.getTime() - presentDate.getTime()) / oneDay
+    return result.toFixed(0)
+}
+
 //other
 function getInputInfo(inputId) {
     //returns this input value
