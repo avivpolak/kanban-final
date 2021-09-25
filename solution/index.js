@@ -1,63 +1,81 @@
-//data
 'use strict'
-let tasks
-let taskIdcount
+
+let tasks = {
+    todo: [],
+    'in-progress': [],
+    done: [],
+}
+let taskExtraInfo = {}
+
 if (!localStorage.tasks) {
-    //if there is info in local storage use it , otherwise create a new, empty "tasks" & "taskIdcount"
+    //if there is no info in local storage send the new empty one,
+    localStorage.setItem('tasks', JSON.stringify(tasks))
+} else tasks = JSON.parse(localStorage.getItem('tasks')) //otherwise use it.get info from local storage.
 
-    tasks = {
-        todo: [],
-        'in-progress': [],
-        done: [],
-    }
-    taskIdcount = 0
-    displayAndSendDataToLocal()
+if (!localStorage.taskExtraInfo) {
+    let itemToSend = Object.assign({}, taskExtraInfo) //cloning taskExtraInfo
+    localStorage.setItem('taskExtraInfo', JSON.stringify(itemToSend)) //sending clone to local
+} else {
+    let itemFromLocal = JSON.parse(localStorage.getItem('taskExtraInfo')) //get the item.
+    taskExtraInfo = Object.assign({}, itemFromLocal)
 }
-tasks = JSON.parse(localStorage.getItem('tasks')) //get info from local storage.
-taskIdcount = JSON.parse(localStorage.getItem('taskIdcount'))
 
-displayElements(tasks) //show what you have got -- the only time displayElements is alone (without sendDataToLocal())
-
+displayElements()
 //making the bottons work
+document.getElementById('submit-add-to-do').addEventListener('click', handleaddToDoTask)
+document.getElementById('submit-add-in-progress').addEventListener('click', handleaddInProgressTask)
+document.getElementById('submit-add-done').addEventListener('click', handleaddDoneTask)
+document.getElementById('todoAddInfo').addEventListener('click', showExtraTodo)
+document.getElementById('inProgressAddInfo').addEventListener('click', showExtraInProgress)
+document.getElementById('doneAddInfo').addEventListener('click', showExtraDone)
+// document.getElementById('inProgressAddInfo').addEventListener('click')
+// document.getElementById('doneAddInfo').addEventListener('click')
 
-document.getElementById('submit-add-to-do').addEventListener('click', addToDoTask)
-document.getElementById('submit-add-in-progress').addEventListener('click', addInProgressTask)
-document.getElementById('submit-add-done').addEventListener('click', addDoneTask)
-//handle mouse gets in parent.
-
-handleMouseOverParent('toDoTasks')
-handleMouseOverParent('inProgressTasks')
-handleMouseOverParent('doneTasks')
-
-function addTask(title, state, desctiption, priority, deadLine, parantTask, timeEstimated, dependsOnTasks, finishTime) {
-    //GENERIC add a new task to "tasks"
-    //add 1 to "taskIdcount"
-    //sends "tasks" & "taskIdcount" to localstorage
-    //display "tasks" on the screen.
-
-    let newTask = {
-        priority,
-        deadLine,
-        title,
-        desctiption,
-        timeEstimated,
-        dependsOnTasks,
-        parantTask,
-        finishTime,
-        state,
-    }
-
-    newTask.userId = 1
-    newTask.taskId = taskIdcount
-    taskIdcount++
-    if (state === 'todo') tasks.todo.unshift(newTask)
-    if (state === 'in-progress') tasks['in-progress'].unshift(newTask)
-    if (state === 'done') tasks.done.unshift(newTask)
-
-    displayAndSendDataToLocal() //display and send  after return
-    return newTask.taskId
+function showExtraTodo() {
+    document.getElementById('extraTodo').classList.toggle('hide')
 }
 
+function showExtraInProgress() {
+    document.getElementById('extraInProgress').classList.toggle('hide')
+}
+
+function showExtraDone() {
+    document.getElementById('extraDone').classList.toggle('hide')
+}
+//addind events to inputs
+
+function daysleft(title) {
+    if (taskExtraInfo.hasOwnProperty(title)) {
+        const deadline = new Date(taskExtraInfo[title].deadline)
+        const presentDate = new Date()
+        const oneDay = 1000 * 60 * 60 * 24
+        let result = Math.round(deadline.getTime() - presentDate.getTime()) / oneDay
+        return result.toFixed(0)
+    }
+    return
+}
+function importance(title) {
+    if (taskExtraInfo.hasOwnProperty(title)) {
+        const timeleft = daysleft(title)
+        const timeEstimated = taskExtraInfo[title].timeEstimated
+        const priority = taskExtraInfo[title].priority
+        return (timeEstimated / timeleft) * priority
+    }
+    return
+}
+function colorFromImportance(importance) {
+    //when importance is more than 10 , you are for sure late.
+    //red = 7-10 so it will be red.
+    //green is between 3-7
+    //gray will be the most none important-1-3.
+
+    importance = importance / 10
+    const r = importance * 120 + 135
+    const g = (1 - importance) * 120 + 100 // this is a parabula , b(g), that have 3 known points.{0(0),150(127.5),0(255)}
+    return `rgb(${r},${g},120)`
+}
+
+//other
 function getInputInfo(inputId) {
     //returns this input value
     //set input value to "".
@@ -66,257 +84,256 @@ function getInputInfo(inputId) {
     document.getElementById(inputId).value = ''
     return value
 }
-function displayAndSendDataToLocal() {
-    //sends "tasks" & "taskIdcount" to localstorage
-
+//databases
+function sendToLocal() {
     localStorage.setItem('tasks', JSON.stringify(tasks))
-    localStorage.setItem('taskIdcount', JSON.stringify(taskIdcount))
-    displayElements(tasks)
+    let itemToSend = Object.assign({}, taskExtraInfo) //sending to local
+    localStorage.setItem('taskExtraInfo', JSON.stringify(itemToSend))
 }
-
-function updateTask(taskId, newProps) {
-    //generic update "tasks" function.
-
-    let newTask = taskFromId(taskId)
-
-    for (let prop in newProps) {
-        newTask[prop] = newProps[prop]
-    }
-
-    //should return the new or doing with it something!   -->comeback-done
-    displayAndSendDataToLocal()
-    return newTask
-}
-
-function taskFromId(taskId) {
-    //returns the task with that id
-    taskId = parseInt(taskId)
-    for (let task of tasks.todo) {
-        console.log('1' + ' ' + task.taskId + ' ' + taskId)
-        if (task.taskId === taskId) return task
-    }
-    for (let task of tasks['in-progress']) {
-        console.log('2' + ' ' + task.taskId + ' ' + taskId)
-        if (task.taskId === taskId) return task
-    }
-    for (let task of tasks.done) {
-        console.log('3' + ' ' + task.taskId + ' ' + taskId)
-        if (task.taskId === taskId) return task
-    }
-    throw new Error("no such task's id")
-}
-function updateState(taskId, newState) {
-    //uses updateTask moveATask to update the task state.
-    //-->whats moveATask
-    //displays-->should not, because its already displays in updateTask
-
-    let origin = taskFromId(taskId).state
-    let updatedTask = updateTask(taskId, { state: newState })
-    let target = taskFromId(taskId).state
-    moveATask(updatedTask, origin, target)
-}
-
-//aplying "handleMouseOverParent" on the wanted parents
-//should be moved to iniatilazing
-
-let isKeyPressed = {
-    //an real-time updated object that indicates the keys pressing.
-    1: false,
-    2: false,
-    3: false,
-    Alt: false, //for some resun its stuck on true
-}
-let correntTaskIdBelow = null //an real-time updated object that indicates the the tops element below mouse
-function highlight() {}
-function handleMouseOverParent(parentId) {
-    //do this to parent:
-
-    document.getElementById(parentId).addEventListener('mouseenter', mouseEnterParent) //start listen to mouse enter
-
-    function mouseEnterParent() {
-        //when the mouse enter parent
-        //start listen to mouse over/leave and keydown.
-        //still have this problem when you get in an element its dosent show the first element below
-
-        document.getElementById(parentId).addEventListener('mouseover', mouseOverParent) //start listen to mouse over
-        document.getElementById(parentId).addEventListener('mouseleave', mouseLeaveParent) //start listen to mouse leave
-        document.addEventListener('keydown', handleKeyDown) //start listen to keydown.
-    }
-
-    function mouseOverParent(e) {
-        //when the mouse over parent
-        //-->update corrent element below(if its LI)
-        //displayAndSendDataToLocal() //to clear the highlight
-        correntTaskIdBelow = null
-        if (e.target.tagName === 'LI') {
-            correntTaskIdBelow = e.target.dataset.id
-            e.target.classList.add('highlight')
+function taskState(title) {
+    {
+        for (let task of tasks.todo) {
+            if (task === title) {
+                return 'todo'
+            }
         }
+        for (let task of tasks['in-progress']) {
+            if (task === title) {
+                return 'in-progress'
+            }
+        }
+
+        for (let task of tasks.done) {
+            if (task === title) {
+                return 'done'
+            }
+        }
+
+        return 'not found'
     }
+}
+//add section
+function stringToKabab(str) {
+    let kabab = ''
 
-    function handleKeyDown(keyDownEvent) {
-        //when a key is down
-        //start listen to keyup
-        //set its corrisponding isKeyPressed key to true
-        //search for alt+(1-3)-->if found update the state of the corrent below
-
-        document.addEventListener('keyup', handleKeyUp) //start listen to keyup.
-        keyDownEvent.preventDefault()
-        isKeyPressed[keyDownEvent.key] = true
-        if (isKeyPressed['Alt'] && correntTaskIdBelow) {
-            if (isKeyPressed[1]) {
-                updateState(correntTaskIdBelow, 'todo', tasks)
-            }
-            if (isKeyPressed[2]) {
-                updateState(correntTaskIdBelow, 'in-progress', tasks)
-            }
-            if (isKeyPressed[3]) {
-                updateState(correntTaskIdBelow, 'done', tasks)
+    for (let i = 0; i < str.length; i++) {
+        if (str[i] !== ' ') {
+            kabab += str[i]
+        } else {
+            if (kabab[length - 1] !== '-') {
+                kabab += '-'
             }
         }
     }
-    function handleKeyUp(KeyUpEvent) {
-        //when a key is up
-        //stop listen to keyup.
-        //set its corrisponding isKeyPressed key to false
-        KeyUpEvent.preventDefault()
-        document.removeEventListener('keyup', handleKeyUp)
-        isKeyPressed[KeyUpEvent.key] = false
-    }
-    function mouseLeaveParent() {
-        //when the mouse leave parent
-        //stop listen to keydown and mouse over
-
-        document.getElementById(parentId).removeEventListener('mouseover', mouseOverParent)
-        document.removeEventListener('keydown', handleKeyDown)
-    }
+    return kabab
 }
 
-function addToDoTask() {
-    //uses addTask to add a To Do Task(if input not empty)--can be smaller.
+function createExtraElement(title) {
+    let propreties = ['description', 'priority', 'deadline', 'timeEstimated', 'parentTask']
+    let extraInfoElement = createElement('div', [], ['info'], { 'data-title-exstra': stringToKabab(title) })
+    extraInfoElement.appendChild(createElement('b', [title], [], {}))
+    extraInfoElement.style.backgroundColor = colorFromImportance(importance(title))
+    if (taskExtraInfo.hasOwnProperty(title)) {
+        for (let proprety of propreties) {
+            if (taskExtraInfo[title].hasOwnProperty(proprety) && taskExtraInfo[title][proprety]) {
+                extraInfoElement.appendChild(createElement('div', [proprety + ':', taskExtraInfo[title][proprety]], [], {}))
+            } else extraInfoElement.appendChild(createElement('div', [`(no ${proprety})`], [], {}))
+        }
+    } else extraInfoElement.appendChild(createElement('div', [`no extra information for ${title}`], [], {}))
 
+    let kababTitle = stringToKabab(title)
+    const parentGuest = document.querySelectorAll(`[data-title~="${kababTitle}"]`)[0]
+    parentGuest.parentNode.insertBefore(extraInfoElement, parentGuest.nextSibling)
+}
+
+function addExtraTodo(title) {
+    taskExtraInfo[title] = {}
+    taskExtraInfo[title].description = document.getElementById('descriptionTodo').value
+    taskExtraInfo[title].priority = document.getElementById('priorityTodo').value
+    taskExtraInfo[title].deadline = document.getElementById('deadlineTodo').value
+    taskExtraInfo[title].timeEstimated = document.getElementById('timeEstimatedTodo').value
+    taskExtraInfo[title].parentTask = document.getElementById('parentTaskTodo').value
+
+    let itemToSend = Object.assign({}, taskExtraInfo) //sending to local
+    localStorage.setItem('taskExtraInfo', JSON.stringify(itemToSend))
+}
+
+function addExtraInProgress(title) {
+    taskExtraInfo[title] = {}
+    taskExtraInfo[title].description = document.getElementById('descriptionInProgress').value
+    taskExtraInfo[title].priority = document.getElementById('priorityInProgress').value
+    taskExtraInfo[title].deadline = document.getElementById('deadlineInProgress').value
+    taskExtraInfo[title].timeEstimated = document.getElementById('timeEstimatedInProgress').value
+    taskExtraInfo[title].parentTask = document.getElementById('parentTaskInProgress').value
+
+    let itemToSend = Object.assign({}, taskExtraInfo) //sending to local
+    localStorage.setItem('taskExtraInfo', JSON.stringify(itemToSend))
+}
+
+function addExtraDone(title) {
+    taskExtraInfo[title] = {}
+    taskExtraInfo[title].description = document.getElementById('descriptionDone').value
+    taskExtraInfo[title].priority = document.getElementById('priorityDone').value
+    taskExtraInfo[title].deadline = document.getElementById('deadlineDone').value
+    taskExtraInfo[title].timeEstimated = document.getElementById('timeEstimatedDone').value
+    taskExtraInfo[title].parentTask = document.getElementById('parentTaskDone').value
+
+    let itemToSend = Object.assign({}, taskExtraInfo) //sending to local
+    localStorage.setItem('taskExtraInfo', JSON.stringify(itemToSend))
+}
+
+function addTask(title, state) {
+    tasks[state].unshift(title)
+    sendToLocal()
+    displayElements()
+}
+
+function handleaddToDoTask() {
+    if (!document.getElementById('extraTodo').classList.contains('')) document.getElementById('extraTodo').classList.add('hide')
     if (document.getElementById('add-to-do-task').value === '') {
         alert('empty input')
         return null
     }
-    addTask(getInputInfo('add-to-do-task'), 'todo')
+    if (howManyTasksHaveThatName(document.getElementById('add-to-do-task').value) > 0) {
+        alert('you cant have 2 tasks with the same name')
+        return null
+    }
+    if (document.getElementById('add-to-do-task').value.includes('\n') || document.getElementById('add-to-do-task').value.includes('  ')) {
+        alert('invalid title')
+        displayElements()
+        return null
+    }
+    let title = getInputInfo('add-to-do-task')
+    addExtraTodo(title)
+    addTask(title, 'todo')
 }
-function addInProgressTask() {
-    //uses addTask to add a in-progress Task(if input not empty)
-
+function handleaddInProgressTask() {
+    if (!document.getElementById('extraInProgress').classList.contains('')) document.getElementById('extraInProgress').classList.add('hide')
     if (document.getElementById('add-in-progress-task').value === '') {
         alert('empty input')
         return null
     }
-    addTask(getInputInfo('add-in-progress-task'), 'in-progress')
+    if (howManyTasksHaveThatName(document.getElementById('add-in-progress-task').value) > 0) {
+        alert('you cant have 2 tasks with the same name')
+        return null
+    }
+    if (
+        document.getElementById('add-in-progress-task').value.includes('\n') ||
+        document.getElementById('add-in-progress-task').value.includes('  ')
+    ) {
+        alert('invalid title')
+        displayElements()
+        return null
+    }
+    let title = getInputInfo('add-in-progress-task')
+    addExtraInProgress(title)
+    addTask(title, 'in-progress')
 }
-function addDoneTask() {
-    //uses addTask to add a done Task(if input not empty)
-
+function handleaddDoneTask() {
+    if (!document.getElementById('extraDone').classList.contains('')) document.getElementById('extraDone').classList.add('hide')
     if (document.getElementById('add-done-task').value === '') {
         alert('empty input')
         return null
     }
-    addTask(getInputInfo('add-done-task'), 'done')
-}
-function moveATask(updatedTask, origin, target) {
-    //copy this task(?) using taskfrom id
-    //use remove() to remove from origin "state"
-    //use addTask (GENERIC) to add to target "state"
-    let oldtaskId = updatedTask.taskId
-    removeTask(oldtaskId, origin)
-    let newId = addTask(updatedTask.title, target)
-    tasks[target][taskIndexById(newId, target)].taskId = oldtaskId
-    // if (tasks[origin][taskIndexById(newId, origin)].taskId === oldtaskId || tasks[origin][taskIndexById(newId, target)].taskId) {
-    //     throw new Error('this is the error')
-    // }
-}
-function removeTask(taskId, origin) {
-    //remove this task from "tasks"
-
-    if (taskIndexById(taskId, origin) === -1) {
-        throw new Error('non-existent ID')
+    if (howManyTasksHaveThatName(document.getElementById('add-done-task').value) > 0) {
+        alert('you cant have 2 tasks with the same name')
+        return null
     }
-    tasks[origin].splice(taskIndexById(taskId, origin), 1)
-    displayAndSendDataToLocal()
+    if (document.getElementById('add-done-task').value.includes('\n') || document.getElementById('add-done-task').value.includes('  ')) {
+        alert('invalid title')
+        displayElements()
+        return null
+    }
+    let title = getInputInfo('add-done-task')
+    addExtraDone(title)
+    addTask(title, 'done')
 }
 
-function taskIndexById(taskId) {
-    //parameters: task id  and where to check for it(state)
-    //returns found (obj):{ index:index of the id,state:where it was found (tasks.todo/in progress/done)}
-
-    taskId = parseInt(taskId)
-    let found = {}
-    for (let i = 0; i < tasks['todo'].length; i++) {
-        if (tasks[origin][i].taskId === taskId) {
-            found.index = i
-            found.state = 'todo'
-        }
-    }
-    for (let i = 0; i < tasks['in-progress'].length; i++) {
-        if (tasks[origin][i].taskId === taskId) {
-            found.index = i
-            found.state = 'in-progress'
-        }
-    }
-    for (let i = 0; i < tasks['done'].length; i++) {
-        if (tasks[origin][i].taskId === taskId) {
-            found.index = i
-            found.state = 'done'
-        }
-    }
-
-    return -1
-}
-
-function addElement(parentId, element) {
-    //appends element child to parent
-
-    document.getElementById(parentId).appendChild(element)
-}
-function generateTasks() {
-    //uses createTaskElement to create (and append to matching parent) an element for each task object.
-
+function howManyTasksHaveThatName(title) {
+    let i = 0
     for (let task of tasks.todo) {
-        createTaskElement(task)
+        if (task === title) {
+            i++
+        }
     }
     for (let task of tasks['in-progress']) {
-        createTaskElement(task)
+        if (task === title) {
+            i++
+        }
     }
+
     for (let task of tasks.done) {
-        createTaskElement(task)
+        if (task === title) {
+            i++
+        }
+    }
+
+    return i
+}
+
+//move task
+function moveTask(title, target) {
+    removeTask(title)
+    addTask(title, target)
+}
+//rename
+function rename(oldName, newName) {
+    let i = 0
+    for (let task of tasks.todo) {
+        if (task === oldName) {
+            tasks['todo'].splice(i, 1, newName)
+        }
+        i++
+    }
+    i = 0
+    for (let task of tasks['in-progress']) {
+        if (task === oldName) {
+            tasks['in-progress'].splice(i, 1, newName)
+        }
+        i++
+    }
+    i = 0
+    for (let task of tasks.done) {
+        if (task === oldName) {
+            tasks['done'].splice(i, 1, newName)
+        }
+        i++
+    }
+    taskExtraInfo[newName] = Object.assign({}, taskExtraInfo[oldName])
+    sendToLocal()
+    displayElements()
+}
+//remove
+function removeTask(title) {
+    let i = 0
+    for (let task of tasks.todo) {
+        if (task === title) {
+            tasks['todo'].splice(i, 1)
+        }
+        i++
+    }
+    i = 0
+    for (let task of tasks['in-progress']) {
+        if (task === title) {
+            tasks['in-progress'].splice(i, 1)
+        }
+        i++
+    }
+    i = 0
+    for (let task of tasks.done) {
+        if (task === title) {
+            tasks['done'].splice(i, 1)
+        }
+        i++
     }
 }
-function removeAllchildrens(Id) {
-    //remove all the childrens from parant
 
-    let parent = document.getElementById(Id)
-    while (parent.firstChild) {
-        parent.removeChild(parent.lastChild)
-    }
-}
-function displayElements() {
-    //remove parents from all childrens, and fill them again from "tasks"
-    removeAllchildrens('toDoTasks')
-    removeAllchildrens('inProgressTasks')
-    removeAllchildrens('doneTasks')
-    generateTasks()
-}
-function createTaskElement(task) {
-    //uses createElement to creat an task elment
-
-    let newElement = createElement('li', [], ['task'], { 'data-id': task.taskId })
-    newElement.innerText = task.title
-
-    if (task.state === 'todo') addElement('toDoTasks', newElement)
-    if (task.state === 'in-progress') addElement('inProgressTasks', newElement)
-    if (task.state === 'done') addElement('doneTasks', newElement)
-}
+//DOM
 function createElement(tagname, children = [], classes = [], attributes, events) {
     //the most generic element builder.
     //we will build all the elements here.
 
-    const el = document.createElement(tagname)
+    let el = document.createElement(tagname)
 
     //children
 
@@ -346,4 +363,253 @@ function createElement(tagname, children = [], classes = [], attributes, events)
     }
 
     return el
+}
+function appendElement(parentId, element) {
+    //appends element child to parent
+
+    document.getElementById(parentId).appendChild(element)
+}
+function openExtraInfo(event) {
+    const title = stringToKabab(event.target.firstChild.wholeText)
+    if (event.target.parentElement.querySelectorAll(`[data-title-exstra~="${title}"]`)[0])
+        event.target.parentElement.querySelectorAll(`[data-title-exstra~="${title}"]`)[0].remove()
+    else {
+        createExtraElement(title)
+    }
+}
+
+function createTaskElement(title, state) {
+    //uses createElement to creat an task elment
+    //appends it to the match ul
+
+    let newTaskElement = createElement('li', [title], ['task', 'draggable'], { 'data-title': stringToKabab(title) }, {})
+    newTaskElement.addEventListener('click', openExtraInfo)
+
+    if (state === 'todo') appendElement('toDoTasks', newTaskElement)
+    if (state === 'in-progress') appendElement('inProgressTasks', newTaskElement)
+    if (state === 'done') appendElement('doneTasks', newTaskElement)
+    //createExtraElement(title)
+}
+function createTodoTaskElement(title) {
+    createTaskElement(title, 'todo')
+}
+function createInProgressTaskElement(title) {
+    createTaskElement(title, 'in-progress')
+}
+function createDoneTaskElement(title) {
+    createTaskElement(title, 'done')
+}
+function generateTasks() {
+    //uses createTaskElement to create (and append to matching parent) an element for each task object.
+
+    for (let task of tasks.todo) {
+        createTodoTaskElement(task)
+    }
+    for (let task of tasks['in-progress']) {
+        createInProgressTaskElement(task)
+    }
+    for (let task of tasks.done) {
+        createDoneTaskElement(task)
+    }
+}
+function removeAllchildrens(Id) {
+    //remove all the childrens from parant
+
+    let parent = document.getElementById(Id)
+    while (parent.firstChild) {
+        parent.removeChild(parent.lastChild)
+    }
+}
+function displayElements() {
+    //remove parents from all childrens, and fill them again from "tasks"
+    removeAllchildrens('toDoTasks')
+    removeAllchildrens('inProgressTasks')
+    removeAllchildrens('doneTasks')
+
+    generateTasks()
+}
+//events handaling
+document.getElementById('save-btn').addEventListener('click', handleSave)
+document.getElementById('load-btn').addEventListener('click', handleLoad)
+document.getElementById('search').addEventListener('keyup', handleSearchKeyup)
+document.getElementById('toDoTasks').addEventListener('mouseover', mouseOverParent)
+document.getElementById('inProgressTasks').addEventListener('mouseover', mouseOverParent)
+document.getElementById('doneTasks').addEventListener('mouseover', mouseOverParent)
+document.getElementById('toDoTasks').addEventListener('mouseleave', mouseleaveParent)
+document.getElementById('inProgressTasks').addEventListener('mouseleave', mouseleaveParent)
+document.getElementById('doneTasks').addEventListener('mouseleave', mouseleaveParent)
+document.getElementById('toDoTasks').addEventListener('dblclick', handleDubleClick)
+document.getElementById('inProgressTasks').addEventListener('dblclick', handleDubleClick)
+document.getElementById('doneTasks').addEventListener('dblclick', handleDubleClick)
+// document.getElementById('toDoTasks').addEventListener('blur', handleBlur)
+// document.getElementById('inProgressTasks').addEventListener('blur', handleBlur)
+// document.getElementById('doneTasks').addEventListener('blur', handleBlur)
+
+let correntTaskBelow = null
+let correntTaskElementBelow = null
+let wasJustFocused = null
+let wasJustFocusedOldName = null
+
+function mouseOverParent(e) {
+    //when the mouse over parent
+    //-->update corrent element below(if its LI)
+    document.addEventListener('keydown', handleKeyDown) //start listen to keydown.
+
+    correntTaskBelow = null //an real-time updated object that indicates the the tops element below mouse
+    if (e.target.tagName === 'LI') {
+        correntTaskBelow = e.target.innerText
+    }
+
+    correntTaskElementBelow = null //an real-time updated object that indicates the the tops element below mouse
+    if (e.target.tagName === 'LI') {
+        correntTaskElementBelow = e.target
+    }
+}
+function handleDubleClick(event) {
+    correntTaskElementBelow.addEventListener('blur', handleBlur)
+
+    correntTaskElementBelow.contentEditable = true
+    wasJustFocusedOldName = correntTaskElementBelow.innerText
+    correntTaskElementBelow.focus()
+
+    wasJustFocused = correntTaskElementBelow
+}
+function handleBlur(event) {
+    wasJustFocused.contentEditable = false
+
+    if (wasJustFocused.innerText === '') {
+        alert('empty input')
+        displayElements()
+        return null
+    }
+    if (wasJustFocused.innerText === wasJustFocusedOldName) {
+        return null
+    }
+    if (howManyTasksHaveThatName(wasJustFocused.innerText) >= 1) {
+        alert('there is already a task named like that')
+        displayElements()
+        return null
+    }
+
+    if (wasJustFocused.innerText.includes('\n') || wasJustFocused.innerText.includes('  ')) {
+        alert('invalid title')
+        displayElements()
+        return null
+    }
+    rename(wasJustFocusedOldName, wasJustFocused.innerText)
+    sendToLocal()
+    displayElements()
+}
+function handleKeyDown(keyDownEvent) {
+    //keyDownEvent.preventDefault()
+    if (keyDownEvent.altKey) {
+        if (keyDownEvent.key === '1') {
+            moveTask(correntTaskBelow, 'todo')
+        }
+        if (keyDownEvent.key === '2') {
+            moveTask(correntTaskBelow, 'in-progress')
+        }
+        if (keyDownEvent.key === '3') {
+            moveTask(correntTaskBelow, 'done')
+        }
+    }
+}
+function mouseleaveParent() {
+    document.removeEventListener('keydown', handleKeyDown) //stop listen to keydown.
+}
+
+function searchByQuery(query) {
+    //Parameters:QUERY WORD OR SENTNCE.
+    //Returns: CLOSEST PLAYLIST/SONG TO IT.
+    if (query === '') return tasks
+
+    let lowerCasedQuery = query.toLowerCase()
+    let found = {
+        todo: [],
+        'in-progress': [],
+        done: [],
+    }
+    console.log(tasks.todo)
+    for (let task of tasks.todo) {
+        //searching for matching todo.
+        console.log(task)
+        if (task.toLowerCase().includes(lowerCasedQuery)) {
+            found.todo.push(task)
+        }
+    }
+    for (let task of tasks['in-progress']) {
+        //searching for matching todo.
+        if (task.toLowerCase().includes(lowerCasedQuery)) {
+            found['in-progress'].push(task)
+        }
+    }
+    for (let task of tasks.done) {
+        //searching for matching todo.
+        if (task.toLowerCase().includes(lowerCasedQuery)) {
+            found.done.push(task)
+        }
+    }
+
+    return found
+}
+function displayFounds(found) {
+    removeAllchildrens('toDoTasks')
+    removeAllchildrens('inProgressTasks')
+    removeAllchildrens('doneTasks')
+    for (let task of found.todo) {
+        createTodoTaskElement(task)
+    }
+    for (let task of found['in-progress']) {
+        createInProgressTaskElement(task)
+    }
+    for (let task of found.done) {
+        createDoneTaskElement(task)
+    }
+}
+
+function handleSearchKeyup() {
+    displayFounds(searchByQuery(document.getElementById('search').value))
+}
+
+async function handleLoad() {
+    let response = await loadData()
+    tasks = response.tasks
+    sendToLocal()
+    displayElements()
+}
+
+async function loadData() {
+    let response = await fetch('https://json-bins.herokuapp.com/bin/614b11e14021ac0e6c080cdf')
+    if (response.status > 400) {
+        document.getElementById('errorBar').innerText = response.status + ':' + response.statusText
+    } else document.getElementById('errorBar').innerText = 'loaded!'
+    try {
+        return response.json()
+    } catch {
+        return null
+    }
+}
+
+async function handleSave() {
+    await saveData()
+}
+
+async function saveData() {
+    //-->sends post to "https://json-bins.herokuapp.com/bin/614b11e14021ac0e6c080cdf".
+    //-->gets response.
+
+    let tasksTosend = {}
+    tasksTosend.tasks = tasks
+    let response = await fetch('https://json-bins.herokuapp.com/bin/614b11e14021ac0e6c080cdf', {
+        method: 'PUT',
+        headers: {
+            Accept: 'application/json',
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(tasksTosend),
+    })
+    if (response.status > 400) {
+        //response is having a kind of problem.
+        document.getElementById('errorBar').innerText = response.status + ':' + response.statusText
+    } else document.getElementById('errorBar').innerText = 'saved!'
 }
