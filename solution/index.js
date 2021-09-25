@@ -53,11 +53,8 @@ function handleaddTask() {
     manageAdd(document.getElementById('title').value, document.getElementById('state').value)
 }
 function manageAdd(title, state) {
-    console.log(title)
     addExtra(title)
     addTask(title, state)
-    console.log(tasks)
-    console.log(taskExtraInfo)
 }
 function addExtra(title) {
     taskExtraInfo[title] = {}
