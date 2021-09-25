@@ -1,30 +1,25 @@
 'use strict'
 
-let taskExtraInfo = {
-    task1: {
-        description: 'description task 1',
-        priority: 1,
-        createTime: undefined,
-        deadline: undefined,
-        timeEstimated: undefined,
-        dependsOnTasks: ['task3', 'task22'],
-        parentTask: 'task0',
-        finishTime: undefined,
-    },
+let tasks = {
+    todo: [],
+    'in-progress': [],
+    done: [],
 }
+let taskExtraInfo = {}
 
 if (!localStorage.tasks) {
-    //if there is info in local storage use it , otherwise create a new, empty "tasks" & "taskIdcount"
-
-    let tasks = {
-        todo: [],
-        'in-progress': [],
-        done: [],
-    }
-
+    //if there is no info in local storage send the new empty one,
     localStorage.setItem('tasks', JSON.stringify(tasks))
+} else tasks = JSON.parse(localStorage.getItem('tasks')) //otherwise use it.get info from local storage.
+
+if (!localStorage.taskExtraInfo) {
+    let itemToSend = Object.assign({}, taskExtraInfo) //cloning taskExtraInfo
+    localStorage.setItem('taskExtraInfo', JSON.stringify(itemToSend)) //sending clone to local
+} else {
+    let itemFromLocal = JSON.parse(localStorage.getItem('taskExtraInfo')) //get the item.
+    taskExtraInfo = Object.assign({}, itemFromLocal)
 }
-let tasks = JSON.parse(localStorage.getItem('tasks')) //get info from local storage.
+
 displayElements()
 //making the bottons work
 document.getElementById('submit-add-to-do').addEventListener('click', handleaddToDoTask)
@@ -46,6 +41,17 @@ function sendToLocal() {
 }
 
 //add section
+function addExtra(title) {
+    taskExtraInfo[title] = {}
+    taskExtraInfo[title].description = document.getElementById('description').value
+    taskExtraInfo[title].priority = document.getElementById('priority').value
+    taskExtraInfo[title].deadline = document.getElementById('deadline').value
+    taskExtraInfo[title].timeEstimated = document.getElementById('timeEstimated').value
+    taskExtraInfo[title].parentTask = document.getElementById('parentTask').value
+
+    let itemToSend = Object.assign({}, taskExtraInfo) //sending to local
+    localStorage.setItem('taskExtraInfo', JSON.stringify(itemToSend))
+}
 function addTask(title, state) {
     tasks[state].unshift(title)
     sendToLocal()
@@ -61,8 +67,9 @@ function handleaddToDoTask() {
         alert('you cant have 2 tasks with the same name')
         return null
     }
-
-    addTask(getInputInfo('add-to-do-task'), 'todo')
+    let title = getInputInfo('add-to-do-task')
+    addExtra(title)
+    addTask(title, 'todo')
 }
 function handleaddInProgressTask() {
     if (document.getElementById('add-in-progress-task').value === '') {
@@ -73,7 +80,9 @@ function handleaddInProgressTask() {
         alert('you cant have 2 tasks with the same name')
         return null
     }
-    addTask(getInputInfo('add-in-progress-task'), 'in-progress')
+    let title = getInputInfo('add-in-progress-task')
+    addExtra(title)
+    addTask(title, 'in-progress')
 }
 function handleaddDoneTask() {
     if (document.getElementById('add-done-task').value === '') {
@@ -84,7 +93,9 @@ function handleaddDoneTask() {
         alert('you cant have 2 tasks with the same name')
         return null
     }
-    addTask(getInputInfo('add-done-task'), 'done')
+    let title = getInputInfo('add-done-task')
+    addExtra(title)
+    addTask(title, 'done')
 }
 
 function howManyTasksHaveThatName(title) {
