@@ -39,8 +39,52 @@ function getInputInfo(inputId) {
 function sendToLocal() {
     localStorage.setItem('tasks', JSON.stringify(tasks))
 }
+function taskState(title) {
+    {
+        for (let task of tasks.todo) {
+            if (task === title) {
+                return 'todo'
+            }
+        }
+        for (let task of tasks['in-progress']) {
+            if (task === title) {
+                return 'in-progress'
+            }
+        }
 
+        for (let task of tasks.done) {
+            if (task === title) {
+                return 'done'
+            }
+        }
+
+        return 'not found'
+    }
+}
 //add section
+function createExtraElement(title) {
+    let propreties = ['description', 'priority', 'deadline', 'timeEstimated', 'parentTask']
+    let extraInfoElement = createElement('div', [], ['info', 'hide'], { 'data-title': title })
+    if (taskExtraInfo.hasOwnProperty(title)) {
+        for (let proprety of propreties) {
+            if (taskExtraInfo[title].hasOwnProperty(proprety)) {
+                extraInfoElement.appendChild(createElement('div', [proprety + ':', taskExtraInfo[title][proprety]], [], {}))
+            } else console.log(`no ${proprety}`)
+        }
+    } else extraInfoElement.appendChild(createElement('div', [`no extra information for ${title}`], [], {}))
+    switch (taskState(title)) {
+        case 'todo':
+            appendElement('toDoTasksExtraInfo', extraInfoElement)
+            break
+        case 'in-progress':
+            appendElement('inProgressTasksExtraInfo', extraInfoElement)
+            break
+        case 'todo':
+            appendElement('doneTasksExtraInfo', extraInfoElement)
+            break
+    }
+}
+
 function addExtra(title) {
     taskExtraInfo[title] = {}
     taskExtraInfo[title].description = document.getElementById('description').value
@@ -181,7 +225,7 @@ function createElement(tagname, children = [], classes = [], attributes, events)
     //the most generic element builder.
     //we will build all the elements here.
 
-    const el = document.createElement(tagname)
+    let el = document.createElement(tagname)
 
     //children
 
@@ -217,20 +261,25 @@ function appendElement(parentId, element) {
 
     document.getElementById(parentId).appendChild(element)
 }
+function openExtraInfo(event) {
+    const title = event.target.firstChild.wholeText
+    document.querySelectorAll(`[data-title~="${title}"]`)[0].classList.toggle('hide')
+    // let parent = document.getElementById(event.target.parentElement.id)
+    //document.getElementsByTagName('body')[0].appendChild(iDiv)
+    //appendElement('toDoTasksExtraInfo', createExtraElement(title))
+}
 
 function createTaskElement(title, state) {
     //uses createElement to creat an task elment
     //appends it to the match ul
-    const newNameInput = createElement('input', [], ['hide'], { type: 'text', placeholder: title })
-    let newTaskElement = createElement('li', [newNameInput], ['task', 'draggable'], {})
 
-    newNameInput.value = title
-    newTaskElement.innerText = title
-    newTaskElement.appendChild(newNameInput)
+    let newTaskElement = createElement('li', [title], ['task', 'draggable'], {}, {}) //double refering!
+    newTaskElement.addEventListener('click', openExtraInfo)
 
     if (state === 'todo') appendElement('toDoTasks', newTaskElement)
     if (state === 'in-progress') appendElement('inProgressTasks', newTaskElement)
     if (state === 'done') appendElement('doneTasks', newTaskElement)
+    createExtraElement(title)
 }
 function createTodoTaskElement(title) {
     createTaskElement(title, 'todo')
