@@ -157,41 +157,18 @@ function createExtraElement(title) {
     const parentGuest = document.querySelectorAll(`[data-title~="${kababTitle}"]`)[0]
     parentGuest.parentNode.insertBefore(extraInfoElement, parentGuest.nextSibling)
 }
-
-function addExtraTodo(title) {
-    taskExtraInfo[title] = {}
-    taskExtraInfo[title].description = document.getElementById('descriptionTodo').value
-    taskExtraInfo[title].priority = document.getElementById('priorityTodo').value
-    taskExtraInfo[title].deadline = document.getElementById('deadlineTodo').value
-    taskExtraInfo[title].timeEstimated = document.getElementById('timeEstimatedTodo').value
-    taskExtraInfo[title].parentTask = document.getElementById('parentTaskTodo').value
-
+function sendExtraTolocal() {
     let itemToSend = Object.assign({}, taskExtraInfo) //sending to local
     localStorage.setItem('taskExtraInfo', JSON.stringify(itemToSend))
 }
-
-function addExtraInProgress(title) {
+function addExtra(title, state) {
     taskExtraInfo[title] = {}
-    taskExtraInfo[title].description = document.getElementById('descriptionInProgress').value
-    taskExtraInfo[title].priority = document.getElementById('priorityInProgress').value
-    taskExtraInfo[title].deadline = document.getElementById('deadlineInProgress').value
-    taskExtraInfo[title].timeEstimated = document.getElementById('timeEstimatedInProgress').value
-    taskExtraInfo[title].parentTask = document.getElementById('parentTaskInProgress').value
-
-    let itemToSend = Object.assign({}, taskExtraInfo) //sending to local
-    localStorage.setItem('taskExtraInfo', JSON.stringify(itemToSend))
-}
-
-function addExtraDone(title) {
-    taskExtraInfo[title] = {}
-    taskExtraInfo[title].description = document.getElementById('descriptionDone').value
-    taskExtraInfo[title].priority = document.getElementById('priorityDone').value
-    taskExtraInfo[title].deadline = document.getElementById('deadlineDone').value
-    taskExtraInfo[title].timeEstimated = document.getElementById('timeEstimatedDone').value
-    taskExtraInfo[title].parentTask = document.getElementById('parentTaskDone').value
-
-    let itemToSend = Object.assign({}, taskExtraInfo) //sending to local
-    localStorage.setItem('taskExtraInfo', JSON.stringify(itemToSend))
+    taskExtraInfo[title].description = document.getElementById('description' + state).value
+    taskExtraInfo[title].priority = document.getElementById('priority' + state).value
+    taskExtraInfo[title].deadline = document.getElementById('deadline' + state).value
+    taskExtraInfo[title].timeEstimated = document.getElementById('timeEstimated' + state).value
+    taskExtraInfo[title].parentTask = document.getElementById('parentTask' + state).value
+    sendExtraTolocal()
 }
 
 function addTask(title, state) {
@@ -201,63 +178,62 @@ function addTask(title, state) {
 }
 
 function handleaddToDoTask() {
+    const title = document.getElementById('add-to-do-task').value
     if (!document.getElementById('extraTodo').classList.contains('')) document.getElementById('extraTodo').classList.add('hide')
-    if (document.getElementById('add-to-do-task').value === '') {
+    if (title === '') {
         alert('empty input')
         return null
     }
-    if (howManyTasksHaveThatName(document.getElementById('add-to-do-task').value) > 0) {
+    if (howManyTasksHaveThatName(title) > 0) {
         alert('you cant have 2 tasks with the same name')
         return null
     }
-    if (document.getElementById('add-to-do-task').value.includes('\n') || document.getElementById('add-to-do-task').value.includes('  ')) {
+    if (title.includes('\n') || title.includes('  ')) {
         alert('invalid title')
         displayElements()
         return null
     }
-    let title = getInputInfo('add-to-do-task')
-    addExtraTodo(title)
+    addExtra(title, 'Todo')
     addTask(title, 'todo')
 }
 function handleaddInProgressTask() {
+    const title = document.getElementById('add-in-progress-task').value
     if (!document.getElementById('extraInProgress').classList.contains('')) document.getElementById('extraInProgress').classList.add('hide')
-    if (document.getElementById('add-in-progress-task').value === '') {
+    if (title === '') {
         alert('empty input')
         return null
     }
-    if (howManyTasksHaveThatName(document.getElementById('add-in-progress-task').value) > 0) {
+    if (howManyTasksHaveThatName(title) > 0) {
         alert('you cant have 2 tasks with the same name')
         return null
     }
-    if (
-        document.getElementById('add-in-progress-task').value.includes('\n') ||
-        document.getElementById('add-in-progress-task').value.includes('  ')
-    ) {
+    if (title.includes('\n') || title.includes('  ')) {
         alert('invalid title')
         displayElements()
         return null
     }
-    let title = getInputInfo('add-in-progress-task')
-    addExtraInProgress(title)
+
+    addExtra(title, 'InProgress')
     addTask(title, 'in-progress')
 }
 function handleaddDoneTask() {
+    const title = document.getElementById('add-done-task').value
     if (!document.getElementById('extraDone').classList.contains('')) document.getElementById('extraDone').classList.add('hide')
-    if (document.getElementById('add-done-task').value === '') {
+    if (title === '') {
         alert('empty input')
         return null
     }
-    if (howManyTasksHaveThatName(document.getElementById('add-done-task').value) > 0) {
+    if (howManyTasksHaveThatName(title) > 0) {
         alert('you cant have 2 tasks with the same name')
         return null
     }
-    if (document.getElementById('add-done-task').value.includes('\n') || document.getElementById('add-done-task').value.includes('  ')) {
+    if (title.includes('\n') || title.includes('  ')) {
         alert('invalid title')
         displayElements()
         return null
     }
-    let title = getInputInfo('add-done-task')
-    addExtraDone(title)
+
+    addExtra(title, 'Done')
     addTask(title, 'done')
 }
 
@@ -453,9 +429,6 @@ document.getElementById('doneTasks').addEventListener('mouseleave', mouseleavePa
 document.getElementById('toDoTasks').addEventListener('dblclick', handleDubleClick)
 document.getElementById('inProgressTasks').addEventListener('dblclick', handleDubleClick)
 document.getElementById('doneTasks').addEventListener('dblclick', handleDubleClick)
-// document.getElementById('toDoTasks').addEventListener('blur', handleBlur)
-// document.getElementById('inProgressTasks').addEventListener('blur', handleBlur)
-// document.getElementById('doneTasks').addEventListener('blur', handleBlur)
 
 let correntTaskBelow = null
 let correntTaskElementBelow = null
@@ -733,22 +706,4 @@ function clickDrugAndDropHandler(event) {
             renderBoard()
         }
     }, 300)
-}
-
-let aboveDroppable = false
-
-function enterDroppable(droppableElement) {
-    aboveDroppable = true
-
-    if (droppableElement.tagName === 'LI') {
-        droppableElement.classList.add('below-drag')
-    }
-}
-
-function leaveDroppable(droppableElement) {
-    aboveDroppable = false
-
-    if (droppableElement.tagName === 'LI') {
-        droppableElement.classList.remove('below-drag')
-    }
 }
