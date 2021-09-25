@@ -25,6 +25,15 @@ displayElements()
 document.getElementById('submit-add-to-do').addEventListener('click', handleaddToDoTask)
 document.getElementById('submit-add-in-progress').addEventListener('click', handleaddInProgressTask)
 document.getElementById('submit-add-done').addEventListener('click', handleaddDoneTask)
+document.getElementById('todoAddInfo').addEventListener('click', showExtraTodo)
+// document.getElementById('inProgressAddInfo').addEventListener('click')
+// document.getElementById('doneAddInfo').addEventListener('click')
+
+function showExtraTodo() {
+    document.getElementById('extraTodo').classList.toggle('hide')
+}
+
+//addind events to inputs
 
 //other
 function getInputInfo(inputId) {
@@ -66,8 +75,15 @@ function taskState(title) {
 //add section
 function stringToKabab(str) {
     let kabab = ''
-    for (let char of str) {
-        kabab += char.replace(' ', '-')
+
+    for (let i = 0; i < str.length; i++) {
+        if (str[i] !== ' ') {
+            kabab += str[i]
+        } else {
+            if (kabab[length - 1] !== '-') {
+                kabab += '-'
+            }
+        }
     }
     return kabab
 }
@@ -405,6 +421,7 @@ function handleBlur(event) {
         displayElements()
         return null
     }
+
     if (wasJustFocused.innerText.includes('\n') || wasJustFocused.innerText.includes('  ')) {
         alert('invalid title')
         displayElements()

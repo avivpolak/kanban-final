@@ -30,13 +30,24 @@
         </section>
         <section id="todoSec">
             <div>
-                <input id="add-to-do-task" type="text" placeholder="new to do task" />
-                <button id="submit-add-to-do">submit add to do</button>
+                <div>
+                    <button id="todoAddInfo">↙ add extra info</button>
+                    <input id="add-to-do-task" type="text" placeholder="new to do task" />
+                    <button id="submit-add-to-do">submit add to do</button>
+                </div>
+                <section id="extraTodo" class="hide">
+                    <span><label for="description">Description:</label> <input id="description" type="text" placeholder="description" /></span>
+                    <span><label for="priority">Priority:</label> <input id="priority" type="number" placeholder="1-10" /></span>
+                    <span><label for="deadline">Deadline:</label> <input id="deadline" type="date" placeholder="deadline" /></span>
+                    <span><label for="timeEstimated">Time Estimated:</label> <input id="timeEstimated" type="number" placeholder="days" /></span>
+                    <span><label for="parentTask">Parent Task:</label> <input id="parentTask" type="text" placeholder="parentTask" /></span>
+                </section>
             </div>
             <ul id="toDoTasks" class="to-do-tasks"></ul>
         </section>
         <section id="inProgressSec">
             <div>
+                <button id="inProgressAddInfo">↙ add extra info</button>
                 <input id="add-in-progress-task" type="text" placeholder="new in progress task" />
                 <button id="submit-add-in-progress">submit add in progress</button>
             </div>
@@ -44,7 +55,9 @@
         </section>
         <section id="doneSec">
             <div>
+                <button id="doneAddInfo">↙ add extra info</button>
                 <input id="add-done-task" type="text" placeholder="new done task" />
+
                 <button id="submit-add-done">submit add done</button>
             </div>
             <ul id="doneTasks" class="done-tasks"></ul>
