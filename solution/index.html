@@ -16,18 +16,7 @@
             <button id="load-btn">load</button>
             <div id="errorBar"></div>
         </section>
-        <section id="addsection">
-            <label for="description">Description:</label>
-            <input id="description" type="text" placeholder="description" />
-            <label for="priority">Priority:</label>
-            <input id="priority" type="number" placeholder="1-10" />
-            <label for="deadline">Deadline:</label>
-            <input id="deadline" type="date" placeholder="deadline" />
-            <label for="timeEstimated">Time Estimated:</label>
-            <input id="timeEstimated" type="number" placeholder="days" />
-            <label for="parentTask">Parent Task:</label>
-            <input id="parentTask" type="text" placeholder="parentTask" />
-        </section>
+
         <section id="todoSec">
             <div>
                 <div>
@@ -35,13 +24,36 @@
                     <input id="add-to-do-task" type="text" placeholder="new to do task" />
                     <button id="submit-add-to-do">submit add to do</button>
                 </div>
-                <section id="extraTodo" class="hide">
-                    <span><label for="description">Description:</label> <input id="description" type="text" placeholder="description" /></span>
-                    <span><label for="priority">Priority:</label> <input id="priority" type="number" placeholder="1-10" /></span>
-                    <span><label for="deadline">Deadline:</label> <input id="deadline" type="date" placeholder="deadline" /></span>
-                    <span><label for="timeEstimated">Time Estimated:</label> <input id="timeEstimated" type="number" placeholder="days" /></span>
-                    <span><label for="parentTask">Parent Task:</label> <input id="parentTask" type="text" placeholder="parentTask" /></span>
-                </section>
+
+                <form id="extraTodo" class="form hide">
+                    <ul>
+                        <li>
+                            <label for="descriptionTodo">description</label>
+                            <textarea id="descriptionTodo" onkeyup="adjust_textarea(this)"></textarea>
+                            <span>Enter task description here</span>
+                        </li>
+                        <li>
+                            <label for="priorityTodo">priority</label>
+                            <input type="number" id="priorityTodo" maxlength="100" />
+                            <span>from 1-10 , how much the task is importent</span>
+                        </li>
+                        <li>
+                            <label for="deadlineTodo">deadline</label>
+                            <input type="date" id="deadlineTodo" maxlength="100" />
+                            <span>Your deadline for this task</span>
+                        </li>
+                        <li>
+                            <label for="timeEstimatedTodo">Estimated time</label>
+                            <input type="number" id="timeEstimatedTodo" maxlength="100" />
+                            <span>how much days do you think it will take you</span>
+                        </li>
+                        <li>
+                            <label for="parentTaskTodo">Parent Task</label>
+                            <input type="text" id="parentTaskTodo" maxlength="100" />
+                            <span>does this task is part of something bigger?</span>
+                        </li>
+                    </ul>
+                </form>
             </div>
             <ul id="toDoTasks" class="to-do-tasks"></ul>
         </section>
@@ -50,6 +62,35 @@
                 <button id="inProgressAddInfo">↙ add extra info</button>
                 <input id="add-in-progress-task" type="text" placeholder="new in progress task" />
                 <button id="submit-add-in-progress">submit add in progress</button>
+                <form id="extraInProgress" class="form hide">
+                    <ul>
+                        <li>
+                            <label for="descriptionInProgress">description</label>
+                            <textarea id="descriptionInProgress" onkeyup="adjust_textarea(this)"></textarea>
+                            <span>Enter task description here</span>
+                        </li>
+                        <li>
+                            <label for="priorityInProgress">priority</label>
+                            <input type="number" id="priorityInProgress" maxlength="100" />
+                            <span>from 1-10 , how much the task is importent</span>
+                        </li>
+                        <li>
+                            <label for="deadlineInProgress">deadline</label>
+                            <input type="date" id="deadlineInProgress" maxlength="100" />
+                            <span>Your deadline for this task</span>
+                        </li>
+                        <li>
+                            <label for="timeEstimatedInProgress">Estimated time</label>
+                            <input type="number" id="timeEstimatedInProgress" maxlength="100" />
+                            <span>how much days do you think it will take you</span>
+                        </li>
+                        <li>
+                            <label for="parentTaskInProgress">Parent Task</label>
+                            <input type="text" id="parentTaskInProgress" maxlength="100" />
+                            <span>does this task is part of something bigger?</span>
+                        </li>
+                    </ul>
+                </form>
             </div>
             <ul id="inProgressTasks" class="in-progress-tasks"></ul>
         </section>
@@ -57,8 +98,36 @@
             <div>
                 <button id="doneAddInfo">↙ add extra info</button>
                 <input id="add-done-task" type="text" placeholder="new done task" />
-
                 <button id="submit-add-done">submit add done</button>
+                <form id="extraDone" class="form hide">
+                    <ul>
+                        <li>
+                            <label for="descriptionDone">description</label>
+                            <textarea id="descriptionDone" onkeyup="adjust_textarea(this)"></textarea>
+                            <span>Enter task description here</span>
+                        </li>
+                        <li>
+                            <label for="priorityDone">priority</label>
+                            <input type="number" id="priorityDone" maxlength="100" />
+                            <span>from 1-10 , how much the task is importent</span>
+                        </li>
+                        <li>
+                            <label for="deadlineDone">deadline</label>
+                            <input type="date" id="deadlineDone" maxlength="100" />
+                            <span>Your deadline for this task</span>
+                        </li>
+                        <li>
+                            <label for="timeEstimatedDone">Estimated time</label>
+                            <input type="number" id="timeEstimatedDone" maxlength="100" />
+                            <span>how much days do you think it will take you</span>
+                        </li>
+                        <li>
+                            <label for="parentTaskDone">Parent Task</label>
+                            <input type="text" id="parentTaskDone" maxlength="100" />
+                            <span>does this task is part of something bigger?</span>
+                        </li>
+                    </ul>
+                </form>
             </div>
             <ul id="doneTasks" class="done-tasks"></ul>
         </section>

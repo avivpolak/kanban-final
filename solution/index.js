@@ -26,6 +26,8 @@ document.getElementById('submit-add-to-do').addEventListener('click', handleaddT
 document.getElementById('submit-add-in-progress').addEventListener('click', handleaddInProgressTask)
 document.getElementById('submit-add-done').addEventListener('click', handleaddDoneTask)
 document.getElementById('todoAddInfo').addEventListener('click', showExtraTodo)
+document.getElementById('inProgressAddInfo').addEventListener('click', showExtraInProgress)
+document.getElementById('doneAddInfo').addEventListener('click', showExtraDone)
 // document.getElementById('inProgressAddInfo').addEventListener('click')
 // document.getElementById('doneAddInfo').addEventListener('click')
 
@@ -33,6 +35,13 @@ function showExtraTodo() {
     document.getElementById('extraTodo').classList.toggle('hide')
 }
 
+function showExtraInProgress() {
+    document.getElementById('extraInProgress').classList.toggle('hide')
+}
+
+function showExtraDone() {
+    document.getElementById('extraDone').classList.toggle('hide')
+}
 //addind events to inputs
 
 //other
@@ -105,17 +114,42 @@ function createExtraElement(title) {
     parentGuest.parentNode.insertBefore(extraInfoElement, parentGuest.nextSibling)
 }
 
-function addExtra(title) {
+function addExtraTodo(title) {
     taskExtraInfo[title] = {}
-    taskExtraInfo[title].description = document.getElementById('description').value
-    taskExtraInfo[title].priority = document.getElementById('priority').value
-    taskExtraInfo[title].deadline = document.getElementById('deadline').value
-    taskExtraInfo[title].timeEstimated = document.getElementById('timeEstimated').value
-    taskExtraInfo[title].parentTask = document.getElementById('parentTask').value
+    taskExtraInfo[title].description = document.getElementById('descriptionTodo').value
+    taskExtraInfo[title].priority = document.getElementById('priorityTodo').value
+    taskExtraInfo[title].deadline = document.getElementById('deadlineTodo').value
+    taskExtraInfo[title].timeEstimated = document.getElementById('timeEstimatedTodo').value
+    taskExtraInfo[title].parentTask = document.getElementById('parentTaskTodo').value
 
     let itemToSend = Object.assign({}, taskExtraInfo) //sending to local
     localStorage.setItem('taskExtraInfo', JSON.stringify(itemToSend))
 }
+
+function addExtraInProgress(title) {
+    taskExtraInfo[title] = {}
+    taskExtraInfo[title].description = document.getElementById('descriptionInProgress').value
+    taskExtraInfo[title].priority = document.getElementById('priorityInProgress').value
+    taskExtraInfo[title].deadline = document.getElementById('deadlineInProgress').value
+    taskExtraInfo[title].timeEstimated = document.getElementById('timeEstimatedInProgress').value
+    taskExtraInfo[title].parentTask = document.getElementById('parentTaskInProgress').value
+
+    let itemToSend = Object.assign({}, taskExtraInfo) //sending to local
+    localStorage.setItem('taskExtraInfo', JSON.stringify(itemToSend))
+}
+
+function addExtraDone(title) {
+    taskExtraInfo[title] = {}
+    taskExtraInfo[title].description = document.getElementById('descriptionDone').value
+    taskExtraInfo[title].priority = document.getElementById('priorityDone').value
+    taskExtraInfo[title].deadline = document.getElementById('deadlineDone').value
+    taskExtraInfo[title].timeEstimated = document.getElementById('timeEstimatedDone').value
+    taskExtraInfo[title].parentTask = document.getElementById('parentTaskDone').value
+
+    let itemToSend = Object.assign({}, taskExtraInfo) //sending to local
+    localStorage.setItem('taskExtraInfo', JSON.stringify(itemToSend))
+}
+
 function addTask(title, state) {
     tasks[state].unshift(title)
     sendToLocal()
@@ -123,6 +157,7 @@ function addTask(title, state) {
 }
 
 function handleaddToDoTask() {
+    if (!document.getElementById('extraTodo').classList.contains('')) document.getElementById('extraTodo').classList.add('hide')
     if (document.getElementById('add-to-do-task').value === '') {
         alert('empty input')
         return null
@@ -137,10 +172,11 @@ function handleaddToDoTask() {
         return null
     }
     let title = getInputInfo('add-to-do-task')
-    addExtra(title)
+    addExtraTodo(title)
     addTask(title, 'todo')
 }
 function handleaddInProgressTask() {
+    if (!document.getElementById('extraInProgress').classList.contains('')) document.getElementById('extraInProgress').classList.add('hide')
     if (document.getElementById('add-in-progress-task').value === '') {
         alert('empty input')
         return null
@@ -158,10 +194,11 @@ function handleaddInProgressTask() {
         return null
     }
     let title = getInputInfo('add-in-progress-task')
-    addExtra(title)
+    addExtraInProgress(title)
     addTask(title, 'in-progress')
 }
 function handleaddDoneTask() {
+    if (!document.getElementById('extraDone').classList.contains('')) document.getElementById('extraDone').classList.add('hide')
     if (document.getElementById('add-done-task').value === '') {
         alert('empty input')
         return null
@@ -176,7 +213,7 @@ function handleaddDoneTask() {
         return null
     }
     let title = getInputInfo('add-done-task')
-    addExtra(title)
+    addExtraDone(title)
     addTask(title, 'done')
 }
 
