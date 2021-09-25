@@ -38,6 +38,8 @@ function getInputInfo(inputId) {
 //databases
 function sendToLocal() {
     localStorage.setItem('tasks', JSON.stringify(tasks))
+    let itemToSend = Object.assign({}, taskExtraInfo) //sending to local
+    localStorage.setItem('taskExtraInfo', JSON.stringify(itemToSend))
 }
 function taskState(title) {
     {
@@ -268,7 +270,7 @@ function appendElement(parentId, element) {
 }
 function openExtraInfo(event) {
     const title = event.target.firstChild.wholeText
-    document.querySelectorAll(`[data-title-exstra~="${title}"]`)[0].classList.toggle('hide')
+    // document.querySelectorAll(`[data-title-exstra~="${title}"]`)[0].classList.toggle('hide')
     // let parent = document.getElementById(event.target.parentElement.id)
     //document.getElementsByTagName('body')[0].appendChild(iDiv)
     //appendElement('toDoTasksExtraInfo', createExtraElement(title))
@@ -284,7 +286,7 @@ function createTaskElement(title, state) {
     if (state === 'todo') appendElement('toDoTasks', newTaskElement)
     if (state === 'in-progress') appendElement('inProgressTasks', newTaskElement)
     if (state === 'done') appendElement('doneTasks', newTaskElement)
-    createExtraElement(title)
+    //createExtraElement(title)
 }
 function createTodoTaskElement(title) {
     createTaskElement(title, 'todo')
@@ -321,9 +323,6 @@ function displayElements() {
     removeAllchildrens('toDoTasks')
     removeAllchildrens('inProgressTasks')
     removeAllchildrens('doneTasks')
-    removeAllchildrens('toDoTasksExtraInfo')
-    removeAllchildrens('inProgressTasksExtraInfo')
-    removeAllchildrens('doneTasksExtraInfo')
 
     generateTasks()
 }

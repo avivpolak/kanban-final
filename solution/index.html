@@ -10,11 +10,13 @@
     </head>
     <body>
         <h1 id="page-title">avivs kanban</h1>
-        <input id="search" type="text" placeholder="search" />
-        <button id="save-btn">save</button>
-        <button id="load-btn">load</button>
-        <div id="errorBar"></div>
-        <section>
+        <section id="searchSec">
+            <input id="search" type="text" placeholder="search" />
+            <button id="save-btn">save</button>
+            <button id="load-btn">load</button>
+            <div id="errorBar"></div>
+        </section>
+        <section id="addsection">
             <label for="description">Description:</label>
             <input id="description" type="text" placeholder="description" />
             <label for="priority">Priority:</label>
@@ -26,23 +28,26 @@
             <label for="parentTask">Parent Task:</label>
             <input id="parentTask" type="text" placeholder="parentTask" />
         </section>
-        <section>
-            <input id="add-to-do-task" type="text" placeholder="new to do task" />
-            <button id="submit-add-to-do">submit add to do</button>
+        <section id="todoSec">
+            <div>
+                <input id="add-to-do-task" type="text" placeholder="new to do task" />
+                <button id="submit-add-to-do">submit add to do</button>
+            </div>
             <ul id="toDoTasks" class="to-do-tasks"></ul>
-            <div id="toDoTasksExtraInfo"></div>
         </section>
-        <section>
-            <input id="add-in-progress-task" type="text" placeholder="new in progress task" />
-            <button id="submit-add-in-progress">submit add in progress</button>
+        <section id="inProgressSec">
+            <div>
+                <input id="add-in-progress-task" type="text" placeholder="new in progress task" />
+                <button id="submit-add-in-progress">submit add in progress</button>
+            </div>
             <ul id="inProgressTasks" class="in-progress-tasks"></ul>
-            <div id="inProgressTasksExtraInfo"></div>
         </section>
-        <section>
-            <input id="add-done-task" type="text" placeholder="new done task" />
-            <button id="submit-add-done">submit add done</button>
+        <section id="doneSec">
+            <div>
+                <input id="add-done-task" type="text" placeholder="new done task" />
+                <button id="submit-add-done">submit add done</button>
+            </div>
             <ul id="doneTasks" class="done-tasks"></ul>
-            <div id="doneTasksExtraInfo"></div>
         </section>
     </body>
 </html>

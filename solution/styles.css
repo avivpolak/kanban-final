@@ -6,3 +6,35 @@
 .hide {
     display: none;
 }
+section {
+    margin-top: 5%;
+}
+#page-title {
+    display: flex;
+    justify-content: center;
+}
+#searchSec {
+    margin-top: 1%;
+    float: right;
+}
+#todoSec {
+    width: 30%;
+    float: left;
+}
+#inProgressSec {
+    width: 30%;
+    float: left;
+}
+#doneSec {
+    width: 30%;
+    float: left;
+}
+#addsection {
+    display: flex;
+    justify-content: center;
+}
+div {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
