@@ -64,9 +64,17 @@ function taskState(title) {
     }
 }
 //add section
+function stringToKabab(str) {
+    let kabab = ''
+    for (let char of str) {
+        kabab += char.replace(' ', '-')
+    }
+    return kabab
+}
+
 function createExtraElement(title) {
     let propreties = ['description', 'priority', 'deadline', 'timeEstimated', 'parentTask']
-    let extraInfoElement = createElement('div', [], ['info', 'hide'], { 'data-title-exstra': title })
+    let extraInfoElement = createElement('div', [], ['info'], { 'data-title-exstra': stringToKabab(title) })
     extraInfoElement.appendChild(createElement('b', [title], [], {}))
     if (taskExtraInfo.hasOwnProperty(title)) {
         for (let proprety of propreties) {
@@ -75,20 +83,10 @@ function createExtraElement(title) {
             } else extraInfoElement.appendChild(createElement('div', [`(no ${proprety})`], [], {}))
         }
     } else extraInfoElement.appendChild(createElement('div', [`no extra information for ${title}`], [], {}))
-    //switch (taskState(title)) {
-    //case 'todo':
-    //parentGuest.parentNode.insertBefore(extraInfoElement, parentGuest.nextSibling)
-    const parentGuest = document.querySelectorAll(`[data-title~="${title}"]`)[0]
+
+    let kababTitle = stringToKabab(title)
+    const parentGuest = document.querySelectorAll(`[data-title~="${kababTitle}"]`)[0]
     parentGuest.parentNode.insertBefore(extraInfoElement, parentGuest.nextSibling)
-    //     //appendElement('toDoTasksExtraInfo', extraInfoElement)
-    //     break
-    // case 'in-progress':
-    //     appendElement('inProgressTasksExtraInfo', extraInfoElement)
-    //     break
-    // case 'todo':
-    //     appendElement('doneTasksExtraInfo', extraInfoElement)
-    //     break
-    // }
 }
 
 function addExtra(title) {
@@ -117,6 +115,11 @@ function handleaddToDoTask() {
         alert('you cant have 2 tasks with the same name')
         return null
     }
+    if (document.getElementById('add-to-do-task').value.includes('\n')) {
+        alert('invalid title')
+        displayElements()
+        return null
+    }
     let title = getInputInfo('add-to-do-task')
     addExtra(title)
     addTask(title, 'todo')
@@ -130,6 +133,11 @@ function handleaddInProgressTask() {
         alert('you cant have 2 tasks with the same name')
         return null
     }
+    if (document.getElementById('add-in-progress-task').value.includes('\n')) {
+        alert('invalid title')
+        displayElements()
+        return null
+    }
     let title = getInputInfo('add-in-progress-task')
     addExtra(title)
     addTask(title, 'in-progress')
@@ -141,6 +149,11 @@ function handleaddDoneTask() {
     }
     if (howManyTasksHaveThatName(document.getElementById('add-done-task').value) > 0) {
         alert('you cant have 2 tasks with the same name')
+        return null
+    }
+    if (document.getElementById('add-done-task').value.includes('\n')) {
+        alert('invalid title')
+        displayElements()
         return null
     }
     let title = getInputInfo('add-done-task')
@@ -269,18 +282,19 @@ function appendElement(parentId, element) {
     document.getElementById(parentId).appendChild(element)
 }
 function openExtraInfo(event) {
-    const title = event.target.firstChild.wholeText
-    // document.querySelectorAll(`[data-title-exstra~="${title}"]`)[0].classList.toggle('hide')
-    // let parent = document.getElementById(event.target.parentElement.id)
-    //document.getElementsByTagName('body')[0].appendChild(iDiv)
-    //appendElement('toDoTasksExtraInfo', createExtraElement(title))
+    const title = stringToKabab(event.target.firstChild.wholeText)
+    if (event.target.parentElement.querySelectorAll(`[data-title-exstra~="${title}"]`)[0])
+        event.target.parentElement.querySelectorAll(`[data-title-exstra~="${title}"]`)[0].remove()
+    else {
+        createExtraElement(title)
+    }
 }
 
 function createTaskElement(title, state) {
     //uses createElement to creat an task elment
     //appends it to the match ul
 
-    let newTaskElement = createElement('li', [title], ['task', 'draggable'], { 'data-title': title }, {})
+    let newTaskElement = createElement('li', [title], ['task', 'draggable'], { 'data-title': stringToKabab(title) }, {})
     newTaskElement.addEventListener('click', openExtraInfo)
 
     if (state === 'todo') appendElement('toDoTasks', newTaskElement)
@@ -385,6 +399,11 @@ function handleBlur(event) {
     }
     if (howManyTasksHaveThatName(wasJustFocused.innerText) >= 1) {
         alert('there is already a task named like that')
+        displayElements()
+        return null
+    }
+    if (wasJustFocused.innerText.includes('\n')) {
+        alert('invalid title')
         displayElements()
         return null
     }
