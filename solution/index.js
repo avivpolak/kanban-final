@@ -19,9 +19,12 @@ if (!localStorage.taskExtraInfo) {
     let itemFromLocal = JSON.parse(localStorage.getItem('taskExtraInfo')) //get the item.
     taskExtraInfo = Object.assign({}, itemFromLocal)
 }
+if (!localStorage.theme) setTheme('theme-inviting')
+document.documentElement.className = localStorage.theme
 
 displayElements()
 //making the bottons work
+
 document.getElementById('submit-add-to-do').addEventListener('click', handleaddToDoTask)
 document.getElementById('submit-add-in-progress').addEventListener('click', handleaddInProgressTask)
 document.getElementById('submit-add-done').addEventListener('click', handleaddDoneTask)
@@ -581,8 +584,10 @@ function handleSearchKeyup() {
 }
 
 async function handleLoad() {
+    document.getElementById('loader').classList.toggle('hide')
     let response = await loadData()
     tasks = response.tasks
+    document.getElementById('loader').classList.toggle('hide')
     sendToLocal()
     displayElements()
 }
@@ -606,7 +611,7 @@ async function handleSave() {
 async function saveData() {
     //-->sends post to "https://json-bins.herokuapp.com/bin/614b11e14021ac0e6c080cdf".
     //-->gets response.
-
+    document.getElementById('loader').classList.toggle('hide')
     let tasksTosend = {}
     tasksTosend.tasks = tasks
     let response = await fetch('https://json-bins.herokuapp.com/bin/614b11e14021ac0e6c080cdf', {
@@ -617,8 +622,71 @@ async function saveData() {
         },
         body: JSON.stringify(tasksTosend),
     })
+    document.getElementById('loader').classList.toggle('hide')
     if (response.status > 400) {
         //response is having a kind of problem.
         document.getElementById('errorBar').innerText = response.status + ':' + response.statusText
     } else document.getElementById('errorBar').innerText = 'saved!'
+}
+
+//drag&drop
+let currentDroppable = null
+
+ball.onmousedown = function (event) {
+    let shiftX = event.clientX - ball.getBoundingClientRect().left
+    let shiftY = event.clientY - ball.getBoundingClientRect().top
+
+    ball.style.position = 'absolute'
+    ball.style.zIndex = 1000
+    document.body.append(ball)
+
+    moveAt(event.pageX, event.pageY)
+
+    function moveAt(pageX, pageY) {
+        ball.style.left = pageX - shiftX + 'px'
+        ball.style.top = pageY - shiftY + 'px'
+    }
+
+    function onMouseMove(event) {
+        moveAt(event.pageX, event.pageY)
+
+        ball.hidden = true
+        let elemBelow = document.elementFromPoint(event.clientX, event.clientY)
+        ball.hidden = false
+
+        if (!elemBelow) return
+
+        let droppableBelow = elemBelow.closest('.droppable')
+        if (currentDroppable != droppableBelow) {
+            if (currentDroppable) {
+                // null when we were not over a droppable before this event
+                leaveDroppable(currentDroppable)
+            }
+            currentDroppable = droppableBelow
+            if (currentDroppable) {
+                // null if we're not coming over a droppable now
+                // (maybe just left the droppable)
+                enterDroppable(currentDroppable)
+            }
+        }
+    }
+
+    document.addEventListener('mousemove', onMouseMove)
+
+    ball.onmouseup = function () {
+        document.removeEventListener('mousemove', onMouseMove)
+        ball.onmouseup = null
+    }
+}
+
+function enterDroppable(elem) {
+    elem.style.background = 'pink'
+}
+
+function leaveDroppable(elem) {
+    elem.style.background = ''
+}
+
+ball.ondragstart = function () {
+    return false
 }
