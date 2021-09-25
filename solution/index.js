@@ -45,11 +45,34 @@ function showExtraDone() {
 //addind events to inputs
 
 function daysleft(title) {
-    const deadline = new Date(taskExtraInfo[title].deadline)
-    const presentDate = new Date()
-    const oneDay = 1000 * 60 * 60 * 24
-    let result = Math.round(deadline.getTime() - presentDate.getTime()) / oneDay
-    return result.toFixed(0)
+    if (taskExtraInfo.hasOwnProperty(title)) {
+        const deadline = new Date(taskExtraInfo[title].deadline)
+        const presentDate = new Date()
+        const oneDay = 1000 * 60 * 60 * 24
+        let result = Math.round(deadline.getTime() - presentDate.getTime()) / oneDay
+        return result.toFixed(0)
+    }
+    return
+}
+function importance(title) {
+    if (taskExtraInfo.hasOwnProperty(title)) {
+        const timeleft = daysleft(title)
+        const timeEstimated = taskExtraInfo[title].timeEstimated
+        const priority = taskExtraInfo[title].priority
+        return (timeEstimated / timeleft) * priority
+    }
+    return
+}
+function colorFromImportance(importance) {
+    //when importance is more than 10 , you are for sure late.
+    //red = 7-10 so it will be red.
+    //green is between 3-7
+    //gray will be the most none important-1-3.
+
+    importance = importance / 10
+    const r = importance * 120 + 135
+    const g = (1 - importance) * 120 + 100 // this is a parabula , b(g), that have 3 known points.{0(0),150(127.5),0(255)}
+    return `rgb(${r},${g},120)`
 }
 
 //other
@@ -109,6 +132,7 @@ function createExtraElement(title) {
     let propreties = ['description', 'priority', 'deadline', 'timeEstimated', 'parentTask']
     let extraInfoElement = createElement('div', [], ['info'], { 'data-title-exstra': stringToKabab(title) })
     extraInfoElement.appendChild(createElement('b', [title], [], {}))
+    extraInfoElement.style.backgroundColor = colorFromImportance(importance(title))
     if (taskExtraInfo.hasOwnProperty(title)) {
         for (let proprety of propreties) {
             if (taskExtraInfo[title].hasOwnProperty(proprety) && taskExtraInfo[title][proprety]) {
