@@ -64,25 +64,29 @@ function taskState(title) {
 //add section
 function createExtraElement(title) {
     let propreties = ['description', 'priority', 'deadline', 'timeEstimated', 'parentTask']
-    let extraInfoElement = createElement('div', [], ['info', 'hide'], { 'data-title': title })
+    let extraInfoElement = createElement('div', [], ['info', 'hide'], { 'data-title-exstra': title })
+    extraInfoElement.appendChild(createElement('b', [title], [], {}))
     if (taskExtraInfo.hasOwnProperty(title)) {
         for (let proprety of propreties) {
-            if (taskExtraInfo[title].hasOwnProperty(proprety)) {
+            if (taskExtraInfo[title].hasOwnProperty(proprety) && taskExtraInfo[title][proprety]) {
                 extraInfoElement.appendChild(createElement('div', [proprety + ':', taskExtraInfo[title][proprety]], [], {}))
-            } else console.log(`no ${proprety}`)
+            } else extraInfoElement.appendChild(createElement('div', [`(no ${proprety})`], [], {}))
         }
     } else extraInfoElement.appendChild(createElement('div', [`no extra information for ${title}`], [], {}))
-    switch (taskState(title)) {
-        case 'todo':
-            appendElement('toDoTasksExtraInfo', extraInfoElement)
-            break
-        case 'in-progress':
-            appendElement('inProgressTasksExtraInfo', extraInfoElement)
-            break
-        case 'todo':
-            appendElement('doneTasksExtraInfo', extraInfoElement)
-            break
-    }
+    //switch (taskState(title)) {
+    //case 'todo':
+    //parentGuest.parentNode.insertBefore(extraInfoElement, parentGuest.nextSibling)
+    const parentGuest = document.querySelectorAll(`[data-title~="${title}"]`)[0]
+    parentGuest.parentNode.insertBefore(extraInfoElement, parentGuest.nextSibling)
+    //     //appendElement('toDoTasksExtraInfo', extraInfoElement)
+    //     break
+    // case 'in-progress':
+    //     appendElement('inProgressTasksExtraInfo', extraInfoElement)
+    //     break
+    // case 'todo':
+    //     appendElement('doneTasksExtraInfo', extraInfoElement)
+    //     break
+    // }
 }
 
 function addExtra(title) {
@@ -192,6 +196,7 @@ function rename(oldName, newName) {
         }
         i++
     }
+    taskExtraInfo[newName] = Object.assign({}, taskExtraInfo[oldName])
     sendToLocal()
     displayElements()
 }
@@ -233,7 +238,7 @@ function createElement(tagname, children = [], classes = [], attributes, events)
         if (typeof child === 'string' || typeof child === 'number') {
             child = document.createTextNode(child)
         }
-        el.appendChild(child) //dosent work!
+        el.appendChild(child)
     }
 
     //classes
@@ -263,7 +268,7 @@ function appendElement(parentId, element) {
 }
 function openExtraInfo(event) {
     const title = event.target.firstChild.wholeText
-    document.querySelectorAll(`[data-title~="${title}"]`)[0].classList.toggle('hide')
+    document.querySelectorAll(`[data-title-exstra~="${title}"]`)[0].classList.toggle('hide')
     // let parent = document.getElementById(event.target.parentElement.id)
     //document.getElementsByTagName('body')[0].appendChild(iDiv)
     //appendElement('toDoTasksExtraInfo', createExtraElement(title))
@@ -273,7 +278,7 @@ function createTaskElement(title, state) {
     //uses createElement to creat an task elment
     //appends it to the match ul
 
-    let newTaskElement = createElement('li', [title], ['task', 'draggable'], {}, {}) //double refering!
+    let newTaskElement = createElement('li', [title], ['task', 'draggable'], { 'data-title': title }, {})
     newTaskElement.addEventListener('click', openExtraInfo)
 
     if (state === 'todo') appendElement('toDoTasks', newTaskElement)
@@ -316,6 +321,10 @@ function displayElements() {
     removeAllchildrens('toDoTasks')
     removeAllchildrens('inProgressTasks')
     removeAllchildrens('doneTasks')
+    removeAllchildrens('toDoTasksExtraInfo')
+    removeAllchildrens('inProgressTasksExtraInfo')
+    removeAllchildrens('doneTasksExtraInfo')
+
     generateTasks()
 }
 //events handaling
