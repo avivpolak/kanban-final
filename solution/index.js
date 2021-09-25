@@ -115,7 +115,7 @@ function handleaddToDoTask() {
         alert('you cant have 2 tasks with the same name')
         return null
     }
-    if (document.getElementById('add-to-do-task').value.includes('\n')) {
+    if (document.getElementById('add-to-do-task').value.includes('\n') || document.getElementById('add-to-do-task').value.includes('  ')) {
         alert('invalid title')
         displayElements()
         return null
@@ -133,7 +133,10 @@ function handleaddInProgressTask() {
         alert('you cant have 2 tasks with the same name')
         return null
     }
-    if (document.getElementById('add-in-progress-task').value.includes('\n')) {
+    if (
+        document.getElementById('add-in-progress-task').value.includes('\n') ||
+        document.getElementById('add-in-progress-task').value.includes('  ')
+    ) {
         alert('invalid title')
         displayElements()
         return null
@@ -151,7 +154,7 @@ function handleaddDoneTask() {
         alert('you cant have 2 tasks with the same name')
         return null
     }
-    if (document.getElementById('add-done-task').value.includes('\n')) {
+    if (document.getElementById('add-done-task').value.includes('\n') || document.getElementById('add-done-task').value.includes('  ')) {
         alert('invalid title')
         displayElements()
         return null
@@ -402,7 +405,7 @@ function handleBlur(event) {
         displayElements()
         return null
     }
-    if (wasJustFocused.innerText.includes('\n')) {
+    if (wasJustFocused.innerText.includes('\n') || wasJustFocused.innerText.includes('  ')) {
         alert('invalid title')
         displayElements()
         return null
