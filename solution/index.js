@@ -551,16 +551,6 @@ function clickDrugAndDropHandler(event) {
 
     event.preventDefault()
 
-    //mouseDown = true
-
-    function onMouseUp(event) {
-        if (event.target === target) {
-            //mouseDown = false
-        }
-    }
-
-    document.addEventListener('mouseup', onMouseUp)
-
     setTimeout(() => {
         //if (dblClicked === true || mouseDown === false) return
 
@@ -593,59 +583,40 @@ function clickDrugAndDropHandler(event) {
             let elemBelow = document.elementFromPoint(event.clientX, event.clientY)
             target.style.display = ''
 
-            // mousemove events may trigger out of the window (when the ball is dragged off-screen)
-            // if clientX/clientY are out of the window, then elementFromPoint returns null
             if (!elemBelow) return
 
-            // potential droppable are labeled with the class "droppable" (can be other logic)
             let droppableBelow = elemBelow.closest('.droppable')
 
             if (currentDroppable != droppableBelow) {
-                // we're flying in or out...
-                // note: both values can be null
-                // currentDroppable = null //if we were not over a droppable before this event (e.g over an empty space)
-                //droppableBelow = null //if we're not over a droppable now, during this event
-
                 if (currentDroppable) {
-                    // the logic to process "flying out" of the droppable (remove highlight)
                     leaveDroppable(currentDroppable)
                 }
                 currentDroppable = droppableBelow
                 if (currentDroppable) {
-                    // the logic to process "flying in" of the droppable
                     enterDroppable(currentDroppable)
                 }
             }
         }
 
-        // move the ball on mousemove
+        // move the task on mousemove
         document.addEventListener('mousemove', onMouseMove)
 
-        // drop the ball, remove unneeded handlers
+        // drop the task, remove unneeded handlers
         target.onmouseup = function () {
-            // if (aboveDroppable) {
-            //     if (currentDroppable.tagName === 'LI') {
-            //         const newListId = getAncestorSectionListId(currentDroppable)
-            //         const taskId = Number(target.dataset.originalTaskId)
-            //         const droppableTaskId = getTaskFromLi(currentDroppable).id
-            //         const droppableIndex = board.getTaskIndex(droppableTaskId)
-
-            //         moveTask(taskId, newListId, droppableIndex + 1)
-            //     } else {
-            //         const newListId = getAncestorSectionListId(currentDroppable)
-            //         const taskId = Number(target.dataset.originalTaskId)
-
-            //         moveTask(taskId, newListId)
-            //     }
-            // }
-
-            moveTask(kababToString(target.dataset.title), currentDroppable.dataset.state)
-            currentDroppable.classList.remove('waitingForDrop')
-            document.removeEventListener('mousemove', onMouseMove)
-            target.onmouseup = null
-            target.remove()
-            displayElements()
-            //renderBoard()
+            if (currentDroppable) {
+                moveTask(kababToString(target.dataset.title), currentDroppable.dataset.state)
+                currentDroppable.classList.remove('waitingForDrop')
+                document.removeEventListener('mousemove', onMouseMove)
+                target.onmouseup = null
+                target.remove()
+                displayElements()
+            } else {
+                document.removeEventListener('mousemove', onMouseMove)
+                target.onmouseup = null
+                target.remove()
+                displayElements()
+                return
+            }
         }
     }, 300)
 }
