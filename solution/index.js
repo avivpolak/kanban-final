@@ -147,7 +147,9 @@ function kababToString(kabab) {
     }
     return str
 }
-// document.getElementById('inProgressTasks').addEventListener('click', handleRemove)
+document.getElementById('inProgressTasks').addEventListener('click', handleRemove)
+document.getElementById('toDoTasks').addEventListener('click', handleRemove)
+document.getElementById('doneTasks').addEventListener('click', handleRemove)
 
 // // function handleMainSecEvents(event) {
 // //     try {
@@ -158,14 +160,14 @@ function kababToString(kabab) {
 // //         console.error('no event')
 // //     }
 // // }
-// function handleRemove(event) {
-//     const title = kababToString(event.target.parentElement.firstChild.dataset.title)
-//     if (event.target.name === 'remove') {
-//         removeTask(title)
-//         sendToLocal()
-//         displayElements()
-//     }
-// }
+function handleRemove(event) {
+    const title = kababToString(event.target.parentElement.firstChild.dataset.title)
+    if (event.target.name === 'remove') {
+        removeTask(title)
+        sendToLocal()
+        displayElements()
+    }
+}
 
 function createExtraElement(title) {
     title = kababToString(title)
