@@ -302,6 +302,8 @@ input:checked + label:before {
 .form {
     max-width: 80%;
     margin: 50px auto;
+    margin-top: 0;
+    margin-bottom: 0;
     background: #fff;
     border-radius: 7px;
     padding: 30px;
