@@ -732,4 +732,5 @@ function Gauge(el) {
 // }
 // function enterDroppable(currentDroppable) {
 //     currentDroppable.classList.add('waitingForDrop')
+
 // }
