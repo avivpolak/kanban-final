@@ -1,13 +1,175 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <script src="./index.js" defer></script>
-    <link rel="stylesheet" href="./styles.css" />
-    <title>Tasks manager</title>
-</head>
-<body>
-</body>
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <script src="./index.js" defer></script>
+        <link rel="stylesheet" href="./styles.css" />
+        <title>Tasks manager</title>
+    </head>
+    <body>
+        <section id="searchSec">
+            <input id="search" type="text" placeholder="search" />
+            <button class="container" id="save-btn">save</button>
+            <button class="container" id="load-btn">load</button>
+
+            <section id="loader"></section>
+            <div id="errorBar"></div>
+        </section>
+
+        <div>
+            <label for="theme">Choose theme:</label>
+            <select id="theme" class="select" onchange="setTheme()">
+                <option class="option" value="theme-inviting">inviting</option>
+                <option class="option" value="theme-purple">purple</option>
+                <option class="option" value="theme-creative">creative</option>
+                <option class="option" value="theme-audacious">audacious</option>
+                <option class="option" value="theme-traditional">traditional</option>
+                <option class="option" value="theme-love">love</option>
+                <option class="option" value="theme-striking">striking</option>
+                <option class="option" value="theme-sleek">sleek</option>
+            </select>
+        </div>
+        <div class="gauge gauge--liveupdate" id="gauge">
+            <div class="gauge__container">
+                <div class="gauge__marker"></div>
+                <div class="gauge__background"></div>
+                <div class="gauge__center"></div>
+                <div class="gauge__data"></div>
+                <div class="gauge__needle"></div>
+            </div>
+            <div class="gauge__labels mdl-typography__headline">
+                <span class="gauge__label--low">chilll ya habibi!!</span>
+                <span class="gauge__label--spacer"></span>
+                <span class="gauge__label--high">work harder!</span>
+            </div>
+        </div>
+        <h1 id="page-title">avivs kanban</h1>
+        <section class="mainSec" id="mainSec">
+            <section id="todoSec" class="subMainSec">
+                <div>
+                    <h2>to do:</h2>
+                    <div class="form">
+                        <input id="add-to-do-task" type="text" placeholder="new to do task" />
+                        <li class="container" id="submit-add-to-do">add to do Task</li>
+                        <li class="container" id="todoAddInfo">↙ add extra info</li>
+                    </div>
+
+                    <form id="extraTodo" class="form hide">
+                        <ul>
+                            <li>
+                                <label for="descriptionTodo">description</label>
+                                <textarea id="descriptionTodo"></textarea>
+                                <span>Enter task description here</span>
+                            </li>
+                            <li>
+                                <label for="priorityTodo">priority</label>
+                                <input type="number" id="priorityTodo" maxlength="100" />
+                                <span>from 1-10 , how much the task is importent</span>
+                            </li>
+                            <li>
+                                <label for="deadlineTodo">deadline</label>
+                                <input type="date" id="deadlineTodo" maxlength="100" />
+                                <span>Your deadline for this task</span>
+                            </li>
+                            <li>
+                                <label for="timeEstimatedTodo">Estimated time</label>
+                                <input type="number" id="timeEstimatedTodo" maxlength="100" />
+                                <span>how much days do you think it will take you</span>
+                            </li>
+                            <li>
+                                <label for="parentTaskTodo">Parent Task</label>
+                                <input type="text" id="parentTaskTodo" maxlength="100" />
+                                <span>does this task is part of something bigger?</span>
+                            </li>
+                        </ul>
+                    </form>
+                </div>
+                <ul id="toDoTasks" class="to-do-tasks droppable" data-state="todo"></ul>
+            </section>
+            <section id="inProgressSec" class="subMainSec">
+                <div>
+                    <h2>in progress:</h2>
+                    <div class="form">
+                        <input id="add-in-progress-task" type="text" placeholder="new to do task" />
+                        <li class="container" id="submit-add-in-progress">add in progress task</li>
+                        <li class="container" id="inProgressAddInfo">↙ add extra info</li>
+                    </div>
+
+                    <form id="extraInProgress" class="form hide">
+                        <ul>
+                            <li>
+                                <label for="descriptionInProgress">description</label>
+                                <textarea id="descriptionInProgress"></textarea>
+                                <span>Enter task description here</span>
+                            </li>
+                            <li>
+                                <label for="priorityInProgress">priority</label>
+                                <input type="number" id="priorityInProgress" maxlength="100" />
+                                <span>from 1-10 , how much the task is importent</span>
+                            </li>
+                            <li>
+                                <label for="deadlineInProgress">deadline</label>
+                                <input type="date" id="deadlineInProgress" maxlength="100" />
+                                <span>Your deadline for this task</span>
+                            </li>
+                            <li>
+                                <label for="timeEstimatedInProgress">Estimated time</label>
+                                <input type="number" id="timeEstimatedInProgress" maxlength="100" />
+                                <span>how much days do you think it will take you</span>
+                            </li>
+                            <li>
+                                <label for="parentTaskInProgress">Parent Task</label>
+                                <input type="text" id="parentTaskInProgress" maxlength="100" />
+                                <span>does this task is part of something bigger?</span>
+                            </li>
+                        </ul>
+                    </form>
+                </div>
+                <ul id="inProgressTasks" class="in-progress-tasks droppable" data-state="in-progress"></ul>
+            </section>
+            <section id="doneSec" class="subMainSec">
+                <div>
+                    <h2>done:</h2>
+                    <div class="form">
+                        <input id="add-done-task" type="text" placeholder="add done task" />
+                        <li class="container" id="submit-add-done">add done Task</li>
+                        <li class="container" id="doneAddInfo">↙ add extra info</li>
+                    </div>
+
+                    <form id="extraDone" class="form hide">
+                        <ul>
+                            <li>
+                                <label for="descriptionDone">description</label>
+                                <textarea id="descriptionDone"></textarea>
+                                <span>Enter task description here</span>
+                            </li>
+                            <li>
+                                <label for="priorityDone">priority</label>
+                                <input type="number" id="priorityDone" maxlength="100" />
+                                <span>from 1-10 , how much the task is importent</span>
+                            </li>
+                            <li>
+                                <label for="deadlineDone">deadline</label>
+                                <input type="date" id="deadlineDone" maxlength="100" />
+                                <span>Your deadline for this task</span>
+                            </li>
+                            <li>
+                                <label for="timeEstimatedDone">Estimated time</label>
+                                <input type="number" id="timeEstimatedDone" maxlength="100" />
+                                <span>how much days do you think it will take you</span>
+                            </li>
+                            <li>
+                                <label for="parentTaskDone">Parent Task</label>
+                                <input type="text" id="parentTaskDone" maxlength="100" />
+                                <span>does this task is part of something bigger?</span>
+                            </li>
+                        </ul>
+                    </form>
+                </div>
+                <ul id="doneTasks" class="done-tasks droppable" data-state="done"></ul>
+            </section>
+        </section>
+    </body>
 </html>
