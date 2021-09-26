@@ -1,12 +1,15 @@
 body {
     background-color: var(--font-color);
-    color: var(--color-primary);
-    transition: 5s;
-}
 
+    transition: 2s;
+}
+.waitingForDrop {
+    background-color: var(--color-third);
+}
 .task {
     background-color: var(--color-secondary);
     height: 30px;
+    width: 15%;
     margin: 10px;
 }
 .hide {
@@ -237,6 +240,9 @@ input:checked + label:before {
     border-radius: 50%;
     box-shadow: 0 3.9000000000000004px 0 0 #e15b64;
     transform-origin: 27px 28.95px;
+}
+.remove {
+    float: right;
 }
 .loader {
     width: 98px;

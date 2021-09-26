@@ -67,7 +67,16 @@ function importance(title) {
     return
 }
 function howBusy() {
-    tasks
+    let howBusy = 0
+    for (let state in tasks) {
+        for (let title of tasks[state]) {
+            if (taskExtraInfo.hasOwnProperty(title) && importance(title)) {
+                howBusy += importance(title)
+                console.log(howBusy)
+            }
+        }
+    }
+    return howBusy
 }
 function colorFromImportance(importance) {
     //when importance is more than 10 , you are for sure late.
@@ -103,26 +112,15 @@ function sendToLocal() {
     localStorage.setItem('taskExtraInfo', JSON.stringify(itemToSend))
 }
 function taskState(title) {
-    {
-        for (let task of tasks.todo) {
-            if (task === title) {
-                return 'todo'
+    for (let state in tasks) {
+        for (let task of tasks[state]) {
+            switch (task) {
+                case title:
+                    return state
             }
         }
-        for (let task of tasks['in-progress']) {
-            if (task === title) {
-                return 'in-progress'
-            }
-        }
-
-        for (let task of tasks.done) {
-            if (task === title) {
-                return 'done'
-            }
-        }
-
-        return 'not found'
     }
+    return 'not found'
 }
 //add section
 function stringToKabab(str) {
@@ -132,17 +130,48 @@ function stringToKabab(str) {
         if (str[i] !== ' ') {
             kabab += str[i]
         } else {
-            if (kabab[length - 1] !== '-') {
-                kabab += '-'
-            }
+            kabab += '-'
         }
     }
     return kabab
 }
+function kababToString(kabab) {
+    let str = ''
+
+    for (let i = 0; i < kabab.length; i++) {
+        if (kabab[i] !== '-') {
+            str += kabab[i]
+        } else {
+            str += ' '
+        }
+    }
+    return str
+}
+// document.getElementById('inProgressTasks').addEventListener('click', handleRemove)
+
+// // function handleMainSecEvents(event) {
+// //     try {
+// //         const title = kababToString(event.target.parentElement.firstChild.dataset.title)
+
+// //         if (event.target.name === 'remove') handleRemove(title)
+// //     } catch {
+// //         console.error('no event')
+// //     }
+// // }
+// function handleRemove(event) {
+//     const title = kababToString(event.target.parentElement.firstChild.dataset.title)
+//     if (event.target.name === 'remove') {
+//         removeTask(title)
+//         sendToLocal()
+//         displayElements()
+//     }
+// }
 
 function createExtraElement(title) {
+    title = kababToString(title)
+    const removeBtn = createElement('button', ['remove task❌'], ['remove'], { name: 'remove', 'data-title': stringToKabab(title) })
+    let extraInfoElement = createElement('div', [removeBtn], ['info'], { 'data-title-exstra': stringToKabab(title) })
     let propreties = ['description', 'priority', 'deadline', 'timeEstimated', 'parentTask']
-    let extraInfoElement = createElement('div', [], ['info'], { 'data-title-exstra': stringToKabab(title) })
     extraInfoElement.appendChild(createElement('b', [title], [], {}))
     extraInfoElement.style.backgroundColor = colorFromImportance(importance(title))
     if (taskExtraInfo.hasOwnProperty(title)) {
@@ -176,86 +205,48 @@ function addTask(title, state) {
     sendToLocal()
     displayElements()
 }
+function inputCheck(title) {
+    if (title === '' || howManyTasksHaveThatName(title) > 0 || title.includes('\n') || title.includes('  ')) {
+        alert('invalid input')
+        return false
+    }
+    return true
+}
 
 function handleaddToDoTask() {
     const title = document.getElementById('add-to-do-task').value
     if (!document.getElementById('extraTodo').classList.contains('')) document.getElementById('extraTodo').classList.add('hide')
-    if (title === '') {
-        alert('empty input')
-        return null
+    if (inputCheck(title)) {
+        addExtra(title, 'Todo')
+        addTask(title, 'todo')
     }
-    if (howManyTasksHaveThatName(title) > 0) {
-        alert('you cant have 2 tasks with the same name')
-        return null
-    }
-    if (title.includes('\n') || title.includes('  ')) {
-        alert('invalid title')
-        displayElements()
-        return null
-    }
-    addExtra(title, 'Todo')
-    addTask(title, 'todo')
 }
 function handleaddInProgressTask() {
     const title = document.getElementById('add-in-progress-task').value
     if (!document.getElementById('extraInProgress').classList.contains('')) document.getElementById('extraInProgress').classList.add('hide')
-    if (title === '') {
-        alert('empty input')
-        return null
+    if (inputCheck(title)) {
+        addExtra(title, 'InProgress')
+        addTask(title, 'in-progress')
     }
-    if (howManyTasksHaveThatName(title) > 0) {
-        alert('you cant have 2 tasks with the same name')
-        return null
-    }
-    if (title.includes('\n') || title.includes('  ')) {
-        alert('invalid title')
-        displayElements()
-        return null
-    }
-
-    addExtra(title, 'InProgress')
-    addTask(title, 'in-progress')
 }
 function handleaddDoneTask() {
     const title = document.getElementById('add-done-task').value
     if (!document.getElementById('extraDone').classList.contains('')) document.getElementById('extraDone').classList.add('hide')
-    if (title === '') {
-        alert('empty input')
-        return null
+    if (inputCheck(title)) {
+        addExtra(title, 'Done')
+        addTask(title, 'done')
     }
-    if (howManyTasksHaveThatName(title) > 0) {
-        alert('you cant have 2 tasks with the same name')
-        return null
-    }
-    if (title.includes('\n') || title.includes('  ')) {
-        alert('invalid title')
-        displayElements()
-        return null
-    }
-
-    addExtra(title, 'Done')
-    addTask(title, 'done')
 }
 
 function howManyTasksHaveThatName(title) {
     let i = 0
-    for (let task of tasks.todo) {
-        if (task === title) {
-            i++
+    for (let state in tasks) {
+        for (let task of tasks[state]) {
+            if (task === title) {
+                i++
+            }
         }
     }
-    for (let task of tasks['in-progress']) {
-        if (task === title) {
-            i++
-        }
-    }
-
-    for (let task of tasks.done) {
-        if (task === title) {
-            i++
-        }
-    }
-
     return i
 }
 
@@ -266,26 +257,14 @@ function moveTask(title, target) {
 }
 //rename
 function rename(oldName, newName) {
-    let i = 0
-    for (let task of tasks.todo) {
-        if (task === oldName) {
-            tasks['todo'].splice(i, 1, newName)
+    for (let state in tasks) {
+        let i = 0
+        for (let task of tasks[state]) {
+            if (task === oldName) {
+                tasks[state].splice(i, 1, newName)
+            }
+            i++
         }
-        i++
-    }
-    i = 0
-    for (let task of tasks['in-progress']) {
-        if (task === oldName) {
-            tasks['in-progress'].splice(i, 1, newName)
-        }
-        i++
-    }
-    i = 0
-    for (let task of tasks.done) {
-        if (task === oldName) {
-            tasks['done'].splice(i, 1, newName)
-        }
-        i++
     }
     taskExtraInfo[newName] = Object.assign({}, taskExtraInfo[oldName])
     sendToLocal()
@@ -293,26 +272,14 @@ function rename(oldName, newName) {
 }
 //remove
 function removeTask(title) {
-    let i = 0
-    for (let task of tasks.todo) {
-        if (task === title) {
-            tasks['todo'].splice(i, 1)
+    for (let state in tasks) {
+        let i = 0
+        for (let task of tasks[state]) {
+            if (task === title) {
+                tasks[state].splice(i, 1)
+            }
+            i++
         }
-        i++
-    }
-    i = 0
-    for (let task of tasks['in-progress']) {
-        if (task === title) {
-            tasks['in-progress'].splice(i, 1)
-        }
-        i++
-    }
-    i = 0
-    for (let task of tasks.done) {
-        if (task === title) {
-            tasks['done'].splice(i, 1)
-        }
-        i++
     }
 }
 
@@ -378,26 +345,13 @@ function createTaskElement(title, state) {
     if (state === 'done') appendElement('doneTasks', newTaskElement)
     //createExtraElement(title)
 }
-function createTodoTaskElement(title) {
-    createTaskElement(title, 'todo')
-}
-function createInProgressTaskElement(title) {
-    createTaskElement(title, 'in-progress')
-}
-function createDoneTaskElement(title) {
-    createTaskElement(title, 'done')
-}
+
 function generateTasks() {
     //uses createTaskElement to create (and append to matching parent) an element for each task object.
-
-    for (let task of tasks.todo) {
-        createTodoTaskElement(task)
-    }
-    for (let task of tasks['in-progress']) {
-        createInProgressTaskElement(task)
-    }
-    for (let task of tasks.done) {
-        createDoneTaskElement(task)
+    for (let state in tasks) {
+        for (let task of tasks[state]) {
+            createTaskElement(task, state)
+        }
     }
 }
 function removeAllchildrens(Id) {
@@ -408,12 +362,14 @@ function removeAllchildrens(Id) {
         parent.removeChild(parent.lastChild)
     }
 }
-function displayElements() {
-    //remove parents from all childrens, and fill them again from "tasks"
+function removeAllTasksElements() {
     removeAllchildrens('toDoTasks')
     removeAllchildrens('inProgressTasks')
     removeAllchildrens('doneTasks')
-
+}
+function displayElements() {
+    //remove parents from all childrens, and fill them again from "tasks"
+    removeAllTasksElements()
     generateTasks()
 }
 //events handaling
@@ -514,41 +470,21 @@ function searchByQuery(query) {
         'in-progress': [],
         done: [],
     }
-    console.log(tasks.todo)
-    for (let task of tasks.todo) {
-        //searching for matching todo.
-        console.log(task)
-        if (task.toLowerCase().includes(lowerCasedQuery)) {
-            found.todo.push(task)
+    for (let state in tasks) {
+        for (let task of tasks[state]) {
+            if (task.toLowerCase().includes(lowerCasedQuery)) {
+                found[state].push(task)
+            }
         }
     }
-    for (let task of tasks['in-progress']) {
-        //searching for matching todo.
-        if (task.toLowerCase().includes(lowerCasedQuery)) {
-            found['in-progress'].push(task)
-        }
-    }
-    for (let task of tasks.done) {
-        //searching for matching todo.
-        if (task.toLowerCase().includes(lowerCasedQuery)) {
-            found.done.push(task)
-        }
-    }
-
     return found
 }
 function displayFounds(found) {
-    removeAllchildrens('toDoTasks')
-    removeAllchildrens('inProgressTasks')
-    removeAllchildrens('doneTasks')
-    for (let task of found.todo) {
-        createTodoTaskElement(task)
-    }
-    for (let task of found['in-progress']) {
-        createInProgressTaskElement(task)
-    }
-    for (let task of found.done) {
-        createDoneTaskElement(task)
+    removeAllTasksElements()
+    for (let state in found) {
+        for (let task of found[state]) {
+            createTaskElement(task, state)
+        }
     }
 }
 
@@ -606,24 +542,27 @@ async function saveData() {
 function onDragStart() {
     return false
 }
+for (let tastElem of document.getElementsByClassName('task')) {
+    tastElem.addEventListener('mousedown', clickDrugAndDropHandler)
+}
 
 function clickDrugAndDropHandler(event) {
     const target = event.target
 
     event.preventDefault()
 
-    mouseDown = true
+    //mouseDown = true
 
     function onMouseUp(event) {
         if (event.target === target) {
-            mouseDown = false
+            //mouseDown = false
         }
     }
 
     document.addEventListener('mouseup', onMouseUp)
 
     setTimeout(() => {
-        if (dblClicked === true || mouseDown === false) return
+        //if (dblClicked === true || mouseDown === false) return
 
         event.preventDefault()
 
@@ -664,8 +603,8 @@ function clickDrugAndDropHandler(event) {
             if (currentDroppable != droppableBelow) {
                 // we're flying in or out...
                 // note: both values can be null
-                //   currentDroppable=null if we were not over a droppable before this event (e.g over an empty space)
-                //   droppableBelow=null if we're not over a droppable now, during this event
+                // currentDroppable = null //if we were not over a droppable before this event (e.g over an empty space)
+                //droppableBelow = null //if we're not over a droppable now, during this event
 
                 if (currentDroppable) {
                     // the logic to process "flying out" of the droppable (remove highlight)
@@ -684,26 +623,35 @@ function clickDrugAndDropHandler(event) {
 
         // drop the ball, remove unneeded handlers
         target.onmouseup = function () {
-            if (aboveDroppable) {
-                if (currentDroppable.tagName === 'LI') {
-                    const newListId = getAncestorSectionListId(currentDroppable)
-                    const taskId = Number(target.dataset.originalTaskId)
-                    const droppableTaskId = getTaskFromLi(currentDroppable).id
-                    const droppableIndex = board.getTaskIndex(droppableTaskId)
+            // if (aboveDroppable) {
+            //     if (currentDroppable.tagName === 'LI') {
+            //         const newListId = getAncestorSectionListId(currentDroppable)
+            //         const taskId = Number(target.dataset.originalTaskId)
+            //         const droppableTaskId = getTaskFromLi(currentDroppable).id
+            //         const droppableIndex = board.getTaskIndex(droppableTaskId)
 
-                    moveTask(taskId, newListId, droppableIndex + 1)
-                } else {
-                    const newListId = getAncestorSectionListId(currentDroppable)
-                    const taskId = Number(target.dataset.originalTaskId)
+            //         moveTask(taskId, newListId, droppableIndex + 1)
+            //     } else {
+            //         const newListId = getAncestorSectionListId(currentDroppable)
+            //         const taskId = Number(target.dataset.originalTaskId)
 
-                    moveTask(taskId, newListId)
-                }
-            }
+            //         moveTask(taskId, newListId)
+            //     }
+            // }
 
+            moveTask(kababToString(target.dataset.title), currentDroppable.dataset.state)
+            currentDroppable.classList.remove('waitingForDrop')
             document.removeEventListener('mousemove', onMouseMove)
             target.onmouseup = null
             target.remove()
-            renderBoard()
+            displayElements()
+            //renderBoard()
         }
     }, 300)
+}
+function leaveDroppable(currentDroppable) {
+    currentDroppable.classList.remove('waitingForDrop')
+}
+function enterDroppable(currentDroppable) {
+    currentDroppable.classList.add('waitingForDrop')
 }

@@ -36,7 +36,7 @@
                 <option class="option" value="theme-sleek">sleek</option>
             </select>
         </div>
-        <section class="mainSec">
+        <section class="mainSec" id="mainSec">
             <section id="todoSec" class="subMainSec">
                 <div>
                     <div>
@@ -75,7 +75,7 @@
                         </ul>
                     </form>
                 </div>
-                <ul id="toDoTasks" class="to-do-tasks"></ul>
+                <ul id="toDoTasks" class="to-do-tasks droppable" data-state="todo"></ul>
             </section>
             <section id="inProgressSec" class="subMainSec">
                 <div>
@@ -112,7 +112,7 @@
                         </ul>
                     </form>
                 </div>
-                <ul id="inProgressTasks" class="in-progress-tasks"></ul>
+                <ul id="inProgressTasks" class="in-progress-tasks droppable" data-state="in-progress"></ul>
             </section>
             <section id="doneSec" class="subMainSec">
                 <div>
@@ -149,7 +149,7 @@
                         </ul>
                     </form>
                 </div>
-                <ul id="doneTasks" class="done-tasks"></ul>
+                <ul id="doneTasks" class="done-tasks droppable" data-state="done"></ul>
             </section>
         </section>
     </body>
