@@ -96,7 +96,7 @@ function setTheme() {
     localStorage.setItem('theme', themeName)
     document.documentElement.className = themeName
 }
-document.getElementById('submitTheme').addEventListener('click', setTheme)
+
 function getInputInfo(inputId) {
     //returns this input value
     //set input value to "".
