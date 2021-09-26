@@ -23,6 +23,11 @@ if (!localStorage.theme) setTheme('theme-inviting')
 document.documentElement.className = localStorage.theme
 
 displayElements()
+
+function nitialization(howBusy) {
+    let gauge = new Gauge(document.getElementById('gauge'))
+    gauge.value(howBusy)
+}
 //making the bottons work
 
 document.getElementById('submit-add-to-do').addEventListener('click', handleaddToDoTask)
@@ -62,29 +67,41 @@ function importance(title) {
         const timeleft = daysleft(title)
         const timeEstimated = taskExtraInfo[title].timeEstimated
         const priority = taskExtraInfo[title].priority
-        return (timeEstimated / timeleft) * priority
+        let importance = (timeEstimated / timeleft) * priority
+        if (importance < 0) return 0
+        if (importance > 10) return 1
+        return importance / 10
     }
     return
+}
+sortByImportance()
+function sortByImportance() {
+    console.log(tasks['in-progress'])
+    tasks['in-progress'].sort(function (a, b) {
+        return importance(a) - importance(b)
+    })
+    console.log(tasks['in-progress'])
 }
 function howBusy() {
     let howBusy = 0
     for (let state in tasks) {
         for (let title of tasks[state]) {
-            if (taskExtraInfo.hasOwnProperty(title) && importance(title)) {
+            if (taskExtraInfo.hasOwnProperty(title) && importance(title) && state !== 'done') {
                 howBusy += importance(title)
                 console.log(howBusy)
             }
         }
     }
-    return howBusy
+    if (howBusy < 0) return 0
+    if (howBusy > 10) return 1
+    return howBusy / 10
 }
 function colorFromImportance(importance) {
-    //when importance is more than 10 , you are for sure late.
-    //red = 7-10 so it will be red.
-    //green is between 3-7
-    //gray will be the most none important-1-3.
+    //when importance is more than 1 , you are for sure late.
+    //red = 0.7-1 so it will be red.
+    //green is between 0.3-0.7
+    //gray will be the most none important-0.1-0.3.
 
-    importance = importance / 10
     const r = importance * 120 + 135
     const g = (1 - importance) * 120 + 100 // this is a parabula , b(g), that have 3 known points.{0(0),150(127.5),0(255)}
     return `rgb(${r},${g},120)`
@@ -184,7 +201,7 @@ function createExtraElement(title) {
             {}
         )
         let deadline = createElement('div', ['deadline:' + taskExtraInfo[title]['deadline']], ['coldInfo'], {})
-        let calcPriority = createElement('div', ['calculated priority:' + importance(title)], ['coldInfo'], {})
+        let calcPriority = createElement('div', ['calculated priority:' + importance(title) * 10], ['coldInfo'], {})
         let right = createElement('div', [deadline, days, calcPriority], ['right'], {})
         let description = createElement('div', [taskExtraInfo[title].description], ['description'], {})
         let infoSec = createElement('div', [description, right], ['infoSec'], {})
@@ -378,6 +395,7 @@ function removeAllTasksElements() {
 }
 function displayElements() {
     //remove parents from all childrens, and fill them again from "tasks"
+    nitialization(howBusy())
     removeAllTasksElements()
     generateTasks()
 }
@@ -501,11 +519,24 @@ function handleSearchKeyup() {
     displayFounds(searchByQuery(document.getElementById('search').value))
 }
 
+function loader(state) {
+    if (state === 'create') {
+        let wrapper = createElement('section', [], ['loader'], { id: 'spinner' }, {})
+        let loader = createElement('div', [], ['ldio-6cpvji16g73'], {}, {})
+        let spinner = createElement('div', [], [], {}, {})
+        loader.appendChild(spinner)
+        wrapper.appendChild(loader)
+        document.getElementById('loader').appendChild(wrapper)
+    }
+    if (state === 'remove') {
+        document.getElementById('spinner').remove()
+    }
+}
 async function handleLoad() {
-    document.getElementById('loader').classList.toggle('hide')
+    loader('create')
     let response = await loadData()
     tasks = response.tasks
-    document.getElementById('loader').classList.toggle('hide')
+    loader('remove')
     sendToLocal()
     displayElements()
 }
@@ -523,13 +554,15 @@ async function loadData() {
 }
 
 async function handleSave() {
+    loader('create')
     await saveData()
+    loader('remove')
 }
 
 async function saveData() {
     //-->sends post to "https://json-bins.herokuapp.com/bin/614b11e14021ac0e6c080cdf".
     //-->gets response.
-    document.getElementById('loader').classList.toggle('hide')
+
     let tasksTosend = {}
     tasksTosend.tasks = tasks
     let response = await fetch('https://json-bins.herokuapp.com/bin/614b11e14021ac0e6c080cdf', {
@@ -540,11 +573,76 @@ async function saveData() {
         },
         body: JSON.stringify(tasksTosend),
     })
-    document.getElementById('loader').classList.toggle('hide')
+
     if (response.status > 400) {
         //response is having a kind of problem.
         document.getElementById('errorBar').innerText = response.status + ':' + response.statusText
     } else document.getElementById('errorBar').innerText = 'saved!'
+}
+
+// The Gauge-----> i did not wrote this code
+
+function Gauge(el) {
+    //Private Properties and Attributes
+
+    let element, // Containing element for the info component
+        data, // `.gauge__data` element
+        needle, // `.gauge__needle` element
+        value = 0.0, // Current gauge value from 0 to 1
+        prop // Style for transform
+
+    //Private Methods and Functions
+
+    let setElement = function (el) {
+        // Keep a reference to the various elements and sub-elements
+        element = el
+        data = element.querySelector('.gauge__data')
+        needle = element.querySelector('.gauge__needle')
+    }
+
+    let setValue = function (x) {
+        value = x
+        let turns = -0.5 + x * 0.5
+        data.style[prop] = 'rotate(' + turns + 'turn)'
+        needle.style[prop] = 'rotate(' + turns + 'turn)'
+    }
+
+    //Object to be Returned
+
+    function exports() {}
+
+    //Public API Methods
+
+    exports.element = function (el) {
+        if (!arguments.length) {
+            return element
+        }
+        setElement(el)
+        return this
+    }
+
+    exports.value = function (x) {
+        if (!arguments.length) {
+            return value
+        }
+        setValue(x)
+        return this
+    }
+
+    //nitialization
+
+    let body = document.getElementsByTagName('body')[0]
+    ;['webkitTransform', 'mozTransform', 'msTransform', 'oTransform', 'transform'].forEach(function (p) {
+        if (typeof body.style[p] !== 'undefined') {
+            prop = p
+        }
+    })
+
+    if (arguments.length) {
+        setElement(el)
+    }
+
+    return exports
 }
 
 //drag&drop
