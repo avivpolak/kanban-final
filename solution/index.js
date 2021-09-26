@@ -171,15 +171,22 @@ function createExtraElement(title) {
     title = kababToString(title)
     const removeBtn = createElement('button', ['remove task❌'], ['remove'], { name: 'remove', 'data-title': stringToKabab(title) })
     let extraInfoElement = createElement('div', [removeBtn], ['info'], { 'data-title-exstra': stringToKabab(title) })
-    let propreties = ['description', 'priority', 'deadline', 'timeEstimated', 'parentTask']
     extraInfoElement.appendChild(createElement('b', [title], [], {}))
     extraInfoElement.style.backgroundColor = colorFromImportance(importance(title))
+
     if (taskExtraInfo.hasOwnProperty(title)) {
-        for (let proprety of propreties) {
-            if (taskExtraInfo[title].hasOwnProperty(proprety) && taskExtraInfo[title][proprety]) {
-                extraInfoElement.appendChild(createElement('div', [proprety + ':', taskExtraInfo[title][proprety]], [], {}))
-            } else extraInfoElement.appendChild(createElement('div', [`(no ${proprety})`], [], {}))
-        }
+        let days = createElement(
+            'div',
+            ['days left (Estimated time):' + daysleft(title) + '(' + taskExtraInfo[title].timeEstimated] + ')',
+            ['coldInfo'],
+            {}
+        )
+        let deadline = createElement('div', ['deadline:' + taskExtraInfo[title]['deadline']], ['coldInfo'], {})
+        let calcPriority = createElement('div', ['calculated priority:' + importance(title)], ['coldInfo'], {})
+        let right = createElement('div', [deadline, days, calcPriority], ['right'], {})
+        let description = createElement('div', [taskExtraInfo[title].description], ['description'], {})
+        let infoSec = createElement('div', [description, right], ['infoSec'], {})
+        extraInfoElement.appendChild(infoSec)
     } else extraInfoElement.appendChild(createElement('div', [`no extra information for ${title}`], [], {}))
 
     let kababTitle = stringToKabab(title)
@@ -539,90 +546,90 @@ async function saveData() {
 }
 
 //drag&drop
-function onDragStart() {
-    return false
-}
-for (let tastElem of document.getElementsByClassName('task')) {
-    tastElem.addEventListener('mousedown', clickDrugAndDropHandler)
-}
+// function onDragStart() {
+//     return false
+// }
+// for (let tastElem of document.getElementsByClassName('task')) {
+//     tastElem.addEventListener('mousedown', clickDrugAndDropHandler)
+// }
 
-function clickDrugAndDropHandler(event) {
-    const target = event.target
+// function clickDrugAndDropHandler(event) {
+//     const target = event.target
 
-    event.preventDefault()
+//     event.preventDefault()
 
-    setTimeout(() => {
-        //if (dblClicked === true || mouseDown === false) return
+//     setTimeout(() => {
+//         //if (dblClicked === true || mouseDown === false) return
 
-        event.preventDefault()
+//         event.preventDefault()
 
-        target.classList.add('taskDrag')
+//         target.classList.add('taskDrag')
 
-        let shiftX = event.clientX - target.getBoundingClientRect().left
-        let shiftY = event.clientY - target.getBoundingClientRect().top
+//         let shiftX = event.clientX - target.getBoundingClientRect().left
+//         let shiftY = event.clientY - target.getBoundingClientRect().top
 
-        target.style.position = 'absolute'
-        target.style.zIndex = 1000
-        document.body.append(target)
+//         target.style.position = 'absolute'
+//         target.style.zIndex = 1000
+//         document.body.append(target)
 
-        moveAt(event.pageX, event.pageY)
+//         moveAt(event.pageX, event.pageY)
 
-        // moves the ball at (pageX, pageY) coordinates
-        // taking initial shifts into account
-        function moveAt(pageX, pageY) {
-            target.style.left = pageX - shiftX + 'px'
-            target.style.top = pageY - shiftY + 'px'
-        }
+//         // moves the ball at (pageX, pageY) coordinates
+//         // taking initial shifts into account
+//         function moveAt(pageX, pageY) {
+//             target.style.left = pageX - shiftX + 'px'
+//             target.style.top = pageY - shiftY + 'px'
+//         }
 
-        let currentDroppable = null
+//         let currentDroppable = null
 
-        function onMouseMove(event) {
-            moveAt(event.pageX, event.pageY)
+//         function onMouseMove(event) {
+//             moveAt(event.pageX, event.pageY)
 
-            target.style.display = 'none'
-            let elemBelow = document.elementFromPoint(event.clientX, event.clientY)
-            target.style.display = ''
+//             target.style.display = 'none'
+//             let elemBelow = document.elementFromPoint(event.clientX, event.clientY)
+//             target.style.display = ''
 
-            if (!elemBelow) return
+//             if (!elemBelow) return
 
-            let droppableBelow = elemBelow.closest('.droppable')
+//             let droppableBelow = elemBelow.closest('.droppable')
 
-            if (currentDroppable != droppableBelow) {
-                if (currentDroppable) {
-                    leaveDroppable(currentDroppable)
-                }
-                currentDroppable = droppableBelow
-                if (currentDroppable) {
-                    enterDroppable(currentDroppable)
-                }
-            }
-        }
+//             if (currentDroppable != droppableBelow) {
+//                 if (currentDroppable) {
+//                     leaveDroppable(currentDroppable)
+//                 }
+//                 currentDroppable = droppableBelow
+//                 if (currentDroppable) {
+//                     enterDroppable(currentDroppable)
+//                 }
+//             }
+//         }
 
-        // move the task on mousemove
-        document.addEventListener('mousemove', onMouseMove)
+//         // move the task on mousemove
+//         document.addEventListener('mousemove', onMouseMove)
 
-        // drop the task, remove unneeded handlers
-        target.onmouseup = function () {
-            if (currentDroppable) {
-                moveTask(kababToString(target.dataset.title), currentDroppable.dataset.state)
-                currentDroppable.classList.remove('waitingForDrop')
-                document.removeEventListener('mousemove', onMouseMove)
-                target.onmouseup = null
-                target.remove()
-                displayElements()
-            } else {
-                document.removeEventListener('mousemove', onMouseMove)
-                target.onmouseup = null
-                target.remove()
-                displayElements()
-                return
-            }
-        }
-    }, 300)
-}
-function leaveDroppable(currentDroppable) {
-    currentDroppable.classList.remove('waitingForDrop')
-}
-function enterDroppable(currentDroppable) {
-    currentDroppable.classList.add('waitingForDrop')
-}
+//         // drop the task, remove unneeded handlers
+//         target.onmouseup = function () {
+//             if (currentDroppable) {
+//                 moveTask(kababToString(target.dataset.title), currentDroppable.dataset.state)
+//                 currentDroppable.classList.remove('waitingForDrop')
+//                 document.removeEventListener('mousemove', onMouseMove)
+//                 target.onmouseup = null
+//                 target.remove()
+//                 displayElements()
+//             } else {
+//                 document.removeEventListener('mousemove', onMouseMove)
+//                 target.onmouseup = null
+//                 target.remove()
+//                 displayElements()
+//                 return
+//             }
+//         }
+//     }, 300)
+// }
+// function leaveDroppable(currentDroppable) {
+//     currentDroppable.classList.remove('waitingForDrop')
+// }
+// function enterDroppable(currentDroppable) {
+//     currentDroppable.classList.add('waitingForDrop')
+// }

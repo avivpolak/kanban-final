@@ -1,11 +1,38 @@
 body {
     background-color: var(--font-color);
-
     transition: 2s;
 }
 .waitingForDrop {
     background-color: var(--color-third);
 }
+ul {
+    list-style-type: none;
+    padding: 0;
+}
+li {
+    left: 0;
+    box-shadow: 15px 5px 15px #000000;
+}
+
+.info {
+    box-shadow: 15px 5px 30px #000000;
+} /*
+.infoSec > * {
+    padding: 10px;
+    flex: 1 100%;
+}
+.description {
+    width: 100%;
+}
+.infoSec {
+    flex: 3 0px;
+}
+
+.coldInfo {
+    background-color: var(--color-third);
+    margin: 3px;
+} */
+
 .task {
     background-color: var(--color-secondary);
     height: 30px;
@@ -27,10 +54,12 @@ body {
     box-shadow: 10px 15px 30px #000000;
 }
 .info {
+    width: 100%;
     border-radius: 7px;
     padding: 20px;
     background-color: #ffffff;
 }
+
 .task {
     border-radius: 7px;
     padding: 2px;
@@ -52,15 +81,15 @@ section {
     float: right;
 }
 #todoSec {
-    width: 30%;
+    width: 31%;
     float: left;
 }
 #inProgressSec {
-    width: 30%;
+    width: 31%;
     float: left;
 }
 #doneSec {
-    width: 30%;
+    width: 31%;
     float: left;
 }
 #addsection {
