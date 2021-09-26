@@ -9,7 +9,6 @@
         <title>Tasks manager</title>
     </head>
     <body>
-        <h1 id="page-title">avivs kanban</h1>
         <section id="searchSec">
             <input id="search" type="text" placeholder="search" />
             <button class="container" id="save-btn">save</button>
@@ -22,6 +21,7 @@
             </section>
             <div id="errorBar"></div>
         </section>
+
         <div>
             <input class="container" id="submitTheme" type="submit" value="change!" />
             <label for="theme">Choose theme:</label>
@@ -36,13 +36,15 @@
                 <option class="option" value="theme-sleek">sleek</option>
             </select>
         </div>
+        <h1 id="page-title">avivs kanban</h1>
         <section class="mainSec" id="mainSec">
             <section id="todoSec" class="subMainSec">
                 <div>
-                    <div>
-                        <button class="container" id="todoAddInfo">↙ add extra info</button>
+                    <h2>to do:</h2>
+                    <div class="form">
                         <input id="add-to-do-task" type="text" placeholder="new to do task" />
-                        <button class="container" id="submit-add-to-do">submit add to do</button>
+                        <li class="container" id="submit-add-to-do">add to do Task</li>
+                        <li class="container" id="todoAddInfo">↙ add extra info</li>
                     </div>
 
                     <form id="extraTodo" class="form hide">
@@ -79,9 +81,13 @@
             </section>
             <section id="inProgressSec" class="subMainSec">
                 <div>
-                    <button class="container" id="inProgressAddInfo">↙ add extra info</button>
-                    <input id="add-in-progress-task" type="text" placeholder="new in progress task" />
-                    <button class="container" id="submit-add-in-progress">submit add in progress</button>
+                    <h2>in progress:</h2>
+                    <div class="form">
+                        <input id="add-in-progress-task" type="text" placeholder="new to do task" />
+                        <li class="container" id="submit-add-in-progress">add in progress task</li>
+                        <li class="container" id="inProgressAddInfo">↙ add extra info</li>
+                    </div>
+
                     <form id="extraInProgress" class="form hide">
                         <ul>
                             <li>
@@ -116,9 +122,13 @@
             </section>
             <section id="doneSec" class="subMainSec">
                 <div>
-                    <button class="container" id="doneAddInfo">↙ add extra info</button>
-                    <input id="add-done-task" type="text" placeholder="new done task" />
-                    <button class="container" id="submit-add-done">submit add done</button>
+                    <h2>done:</h2>
+                    <div class="form">
+                        <input id="add-done-task" type="text" placeholder="add done task" />
+                        <li class="container" id="submit-add-done">add done Task</li>
+                        <li class="container" id="doneAddInfo">↙ add extra info</li>
+                    </div>
+
                     <form id="extraDone" class="form hide">
                         <ul>
                             <li>
