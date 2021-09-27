@@ -189,7 +189,7 @@ function colorFromImportance(importance) {
     //this color will pe presented as the extra-info-bar back-ground color
 
     const r = importance * 120 + 135
-    const g = (1 - importance) * 120 + 100 // this is a parabula , b(g), that have 3 known points.{0(0),150(127.5),0(255)}
+    const g = (1 - importance) * 120 + 100 
     return `rgb(${r},${g},120)`
 }
 

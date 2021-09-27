@@ -44,6 +44,9 @@ hover above it , and press alt +1/2/3, it will move it to:1:todo,2:in-progress 3
 
 double click on task, saves automaticly when looses focos.
 
+## remove a task:
+open extra info --> upper right corner-->remove
+
 ## search a task:
 
 just hit a key in the searchbar.
