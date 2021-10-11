@@ -91,7 +91,7 @@ displayElements()
 
 //bottons events handaling installation
 
-document.getElementById('submit-add-to-do').addEventListener('click', handleaddToDoTask)
+document.getElementById('submit-add-to-do').addEventListener('click', handleAddToDoTask)
 document.getElementById('submit-add-in-progress').addEventListener('click', handleaddInProgressTask)
 document.getElementById('submit-add-done').addEventListener('click', handleaddDoneTask)
 document.getElementById('todoAddInfo').addEventListener('click', showExtraTodo)
@@ -189,7 +189,7 @@ function colorFromImportance(importance) {
     //this color will pe presented as the extra-info-bar back-ground color
 
     const r = importance * 120 + 135
-    const g = (1 - importance) * 120 + 100 
+    const g = (1 - importance) * 120 + 100
     return `rgb(${r},${g},120)`
 }
 
@@ -218,6 +218,7 @@ function stringToKabab(str) {
             kabab += '-'
         }
     }
+
     return kabab
 }
 
@@ -239,6 +240,18 @@ function kababToString(kabab) {
 
 //add data to "tasks" & "taskExtraInfo"
 
+function getExtraInput(state) {
+    //gets data from input
+
+    let extraInfo = {}
+    extraInfo.description = document.getElementById('description' + state).value
+    extraInfo.priority = document.getElementById('priority' + state).value
+    extraInfo.deadline = document.getElementById('deadline' + state).value
+    extraInfo.timeEstimated = document.getElementById('timeEstimated' + state).value
+    extraInfo.parentTask = document.getElementById('parentTask' + state).value
+    return extraInfo
+}
+
 function addTask(title, state) {
     //Parameters:task title, state:"todo"/"in-progress"/"done"
     //adds a task to "tasks"
@@ -254,17 +267,11 @@ function addExtra(title, state) {
     //Parameters:task title, state:"todo"/"in-progress"/"done"
     //adds a task to "tasks"
     //updates local storage.
-
-    taskExtraInfo[title] = {}
-    taskExtraInfo[title].description = document.getElementById('description' + state).value
-    taskExtraInfo[title].priority = document.getElementById('priority' + state).value
-    taskExtraInfo[title].deadline = document.getElementById('deadline' + state).value
-    taskExtraInfo[title].timeEstimated = document.getElementById('timeEstimated' + state).value
-    taskExtraInfo[title].parentTask = document.getElementById('parentTask' + state).value
+    taskExtraInfo[title] = Object.assign({}, getExtraInput(state))
     sendToLocal()
 }
 
-function handleaddToDoTask() {
+function handleAddToDoTask() {
     //when "add todo task" button is pressed:
     //take the relavant input value
     //send it to addTask() &  addExtra()
@@ -450,30 +457,24 @@ function createExtraElement(title) {
 function openExtraInfo(event) {
     //adds a relevant extra info element after the task element
     //if its exsist already, removes it.(basiclly toggiling)
-    setTimeout(function(){ 
-        
+    setTimeout(function () {
         if (dblClicked === true) return
-    const title = stringToKabab(event.target.firstChild.wholeText)
-    if (event.target.parentElement.querySelectorAll(`[data-title-exstra~="${title}"]`)[0])
-        event.target.parentElement.querySelectorAll(`[data-title-exstra~="${title}"]`)[0].remove()
-    else {
-        createExtraElement(title)
-    } }, 300);
+        const title = stringToKabab(event.target.firstChild.wholeText)
+        if (event.target.parentElement.querySelectorAll(`[data-title-exstra~="${title}"]`)[0])
+            event.target.parentElement.querySelectorAll(`[data-title-exstra~="${title}"]`)[0].remove()
+        else {
+            createExtraElement(title)
+        }
+    }, 300)
 }
 
 function createTaskElement(title, state) {
     //uses createElement to creat an task elment
     //appends it to the matching <ul>
 
-    let newTaskElement = createElement(
-        'li',
-        [title],
-        ['task', 'draggable'],
-        { 'data-title': stringToKabab(title) },
-        {}
-    )
+    let newTaskElement = createElement('li', [title], ['task', 'draggable'], { 'data-title': stringToKabab(title) }, {})
     newTaskElement.addEventListener('click', openExtraInfo)
-    newTaskElement.addEventListener("mousedown",clickDrugAndDropHandler)
+    newTaskElement.addEventListener('mousedown', clickDrugAndDropHandler)
 
     if (state === 'todo') appendElement('toDoTasks', newTaskElement)
     if (state === 'in-progress') appendElement('inProgressTasks', newTaskElement)
@@ -641,9 +642,9 @@ function handleDubleClick() {
 
     const range = document.createRange()
     const sel = window.getSelection()
-    const length =correntTaskElementBelow.innerText.length
-    correntTaskElementBelow.innerText=""
-    range.setStart(correntTaskElementBelow.firstChild,length)
+    const length = correntTaskElementBelow.innerText.length
+    correntTaskElementBelow.innerText = ''
+    range.setStart(correntTaskElementBelow.firstChild, length)
     range.collapse(true)
     sel.removeAllRanges()
     sel.addRange(range)
@@ -788,14 +789,6 @@ async function saveData() {
 let dblClicked = false // later used to determine if to start drag and drop
 let mouseDown = false // later used to determine if to start drag and drop
 
-function getAncestorSectionListId(liElement) {
-    return Number(liElement.closest('section').dataset.originalListId)
-}
-
-function onDragStart() {
-    return false
-}
-
 function clickDrugAndDropHandler(event) {
     const target = event.target
 
@@ -897,19 +890,13 @@ function clickDrugAndDropHandler(event) {
     }, 300)
 }
 
-let aboveDroppable = false
-
 function enterDroppable(droppableElement) {
-    aboveDroppable = true
-
     if (droppableElement.tagName === 'LI') {
         droppableElement.classList.add('below-drag')
     }
 }
 
 function leaveDroppable(droppableElement) {
-    aboveDroppable = false
-
     if (droppableElement.tagName === 'LI') {
         droppableElement.classList.remove('below-drag')
     }
