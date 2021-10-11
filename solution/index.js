@@ -382,7 +382,7 @@ function removeTask(title) {
     displayElements()
 }
 
-//create DOM elements
+//DOM
 
 function createElement(tagname, children = [], classes = [], attributes, events) {
     //the most generic element builder.
