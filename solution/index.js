@@ -429,8 +429,13 @@ function createExtraElement(title) {
     //on the next click on the same task element, this element will be removed.
 
     title = kababToString(title)
-    const removeBtn = createElement('button', ['remove task❌'], ['remove'], { name: 'remove', 'data-title': stringToKabab(title) })
-    let extraInfoElement = createElement('div', [removeBtn], ['info'], { 'data-title-exstra': stringToKabab(title) })
+    const removeBtn = createElement('button', ['remove task❌'], ['remove'], {
+        name: 'remove',
+        'data-title': stringToKabab(title),
+    })
+    let extraInfoElement = createElement('div', [removeBtn], ['info'], {
+        'data-title-exstra': stringToKabab(title),
+    })
     extraInfoElement.appendChild(createElement('b', [title], [], {}))
     extraInfoElement.style.backgroundColor = colorFromImportance(importance(title))
 
