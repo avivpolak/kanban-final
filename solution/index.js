@@ -1,10 +1,73 @@
 'use strict'
 import style from './styles.css'
-import tasks from "./data/dataStructures"
-import taskExtraInfo from "./data/dataStructures"
+import { daysleft, importance, howBusy, colorFromImportance } from './extraData'
+import { getExtraInput, addTask, addExtra, handleAddToDoTask, handleaddInProgressTask, handleaddDoneTask } from './add'
+import { moveTask, rename, removeTask } from './task'
+import {
+    createExtraElement,
+    openExtraInfo,
+    createTaskElement,
+    appendElement,
+    generateTasks,
+    removeAllchildrens,
+    removeAllTasksElements,
+    displayElements,
+    setTheme,
+} from './dom'
 
+// import tasks from "./data/dataStructures"
+// import taskExtraInfo from "./data/dataStructures"
 
+//DATA STRUCTURES-
 
+//***"tasks" :
+//will handle all of the tasks data structure and the work with the local storage and api */
+//each array contains string's- the titles of the tasks.
+//EVERY TITLE IS UNIQE! - the solution blocks the user from adding 2 same titles.
+
+//
+
+export let tasks = {
+    todo: [],
+    'in-progress': [],
+    done: [],
+}
+
+//***"taskExtraInfo":
+//will handle all of the extra tasks data structure and the work with local storage
+//EACH "tasks" TITLE IS A KEY TO ITS DATA IN "taskExtraInfo".
+//FOR EXSAMPLE:
+//
+//   "laundry": {
+
+//      description: "I have to do laundry because
+//      it's already hard fo…et into a room with too
+//      many clothes on the floor",
+
+//      priority: '7',
+
+//      deadline: '2021-09-27',
+
+//      timeEstimated: '1',
+
+//      parentTask: 'Housework'}
+
+//each of the Fields can be null. this is nom mandatory to add in info.
+//the Fields:
+
+//description : for caricurize more spesific the task.
+
+//priority(1-10):WHEN :
+//              1- if i fill board and have nothin else important to do.
+//              10- its a matter of life and death !
+
+//deadline: when does this task have to be done.
+
+//timeEstimated: Cumulative work days planned for this task
+
+//parentTask:This task is a subtask of the given parent task.
+
+export let taskExtraInfo = {}
 //THE WORK WITH LOCAL STORAGE:
 
 //I USE IT FOR 3 DIFFERANT PARAMETERS TO SAVE:
@@ -67,87 +130,11 @@ document.getElementById('toDoTasks').addEventListener('dblclick', handleDubleCli
 document.getElementById('inProgressTasks').addEventListener('dblclick', handleDubleClick)
 document.getElementById('doneTasks').addEventListener('dblclick', handleDubleClick)
 
-
 //FUNCTIONS
-
-//EXTRA-Data processing functions:
-
-function daysleft(title) {
-    //Parameters:tasks title
-    //returns:days left till deadline
-
-    if (taskExtraInfo.hasOwnProperty(title)) {
-        const deadline = new Date(taskExtraInfo[title].deadline)
-        const presentDate = new Date()
-        const oneDay = 1000 * 60 * 60 * 24 //milliseconds in 1 day.
-        let result = Math.round(deadline.getTime() - presentDate.getTime()) / oneDay
-        return result.toFixed(0)
-    }
-    return
-}
-function importance(title) {
-    //Parameters:tasks title
-    //calculate the importance of evey task now:
-    //
-    //importance =  (timeEstimated / timeleft) * priority
-    //
-    //SO AS THE DEADLINE GETTING CLOSE, THE TASK GET HIGHER IMPORTANCE
-    //
-    //importance can be a number between 0 and 1
-    //
-    //1- means you are for sure late.(according to your time estimation.)
-    //
-    //it is different from priority!, it is dynamic and get change with time.
-    //
-    //
-    //returns:importance
-
-    if (taskExtraInfo.hasOwnProperty(title)) {
-        const timeleft = daysleft(title)
-        const timeEstimated = taskExtraInfo[title].timeEstimated
-        const priority = taskExtraInfo[title].priority
-        let importance = (timeEstimated / timeleft) * priority
-        if (importance < 0) return 0
-        if (importance > 10) return 1
-        return importance / 10
-    }
-    return
-}
-
-function howBusy() {
-    //return the sum of your tasks importance
-    //min : 0
-    //max : 1
-
-    let howBusy = 0
-    for (let state in tasks) {
-        for (let title of tasks[state]) {
-            if (taskExtraInfo.hasOwnProperty(title) && importance(title) && state !== 'done') {
-                howBusy += importance(title)
-            }
-        }
-    }
-    if (howBusy < 0) return 0
-    if (howBusy > 10) return 1
-    return howBusy / 10
-}
-function colorFromImportance(importance) {
-    //generates rgb color from given importance.
-    //as said , when importance is more than 1 , you are for sure late.
-    //red = 0.7-1 so it will be red.
-    //green is between 0.3-0.7
-    //gray will be the most none important-0.1-0.3.
-
-    //this color will pe presented as the extra-info-bar back-ground color
-
-    const r = importance * 120 + 135
-    const g = (1 - importance) * 120 + 100
-    return `rgb(${r},${g},120)`
-}
 
 //databases
 
-function sendToLocal() {
+export function sendToLocal() {
     //sending "tasks" & "taskExtraInfo" to local storage
 
     localStorage.setItem('tasks', JSON.stringify(tasks))
@@ -157,7 +144,7 @@ function sendToLocal() {
 
 //"tasks" processing functions
 
-function stringToKabab(str) {
+export function stringToKabab(str) {
     //Parameters:string with spaces
     //returns:kabab structued string("-" insted of space)
 
@@ -174,7 +161,7 @@ function stringToKabab(str) {
     return kabab
 }
 
-function kababToString(kabab) {
+export function kababToString(kabab) {
     //Parameters:kabab structued string("-" insted of space)
     //returns:string with spaces
 
@@ -190,307 +177,163 @@ function kababToString(kabab) {
     return str
 }
 
-//add data to "tasks" & "taskExtraInfo"
+// //DOM
 
-function getExtraInput(state) {
-    //gets data from input
+// function createElement(tagname, children = [], classes = [], attributes, events) {
+//     //the most generic element builder.
+//     //we will build all the elements here.
 
-    let extraInfo = {}
-    extraInfo.description = document.getElementById('description' + state).value
-    extraInfo.priority = document.getElementById('priority' + state).value
-    extraInfo.deadline = document.getElementById('deadline' + state).value
-    extraInfo.timeEstimated = document.getElementById('timeEstimated' + state).value
-    extraInfo.parentTask = document.getElementById('parentTask' + state).value
-    return extraInfo
-}
+//     let element = document.createElement(tagname)
 
-function addTask(title, state) {
-    //Parameters:task title, state:"todo"/"in-progress"/"done"
-    //adds a task to "tasks"
-    //updates local storage.
-    //updates DOM.
+//     //children
 
-    tasks[state].unshift(title)
-    sendToLocal()
-    displayElements()
-}
+//     for (let child of children) {
+//         if (typeof child === 'string' || typeof child === 'number') {
+//             child = document.createTextNode(child)
+//         }
+//         element.appendChild(child)
+//     }
 
-function addExtra(title, state) {
-    //Parameters:task title, state:"todo"/"in-progress"/"done"
-    //adds a task to "tasks"
-    //updates local storage.
-    taskExtraInfo[title] = Object.assign({}, getExtraInput(state))
-    sendToLocal()
-}
+//     //classes
 
-function handleAddToDoTask() {
-    //when "add todo task" button is pressed:
-    //take the relavant input value
-    //send it to addTask() &  addExtra()
+//     for (const cls of classes) {
+//         element.classList.add(cls)
+//     }
 
-    const title = document.getElementById('add-to-do-task').value
-    if (!document.getElementById('extraTodo').classList.contains('')) document.getElementById('extraTodo').classList.add('hide')
-    if (inputCheck(title)) {
-        addExtra(title, 'Todo')
-        addTask(title, 'todo')
-    }
-}
+//     //attrubutes
 
-function handleaddInProgressTask() {
-    //when "add In-Progress task" button is pressed:
-    //take the relavant input value
-    //send it to addTask() &  addExtra()
+//     for (const attr in attributes) {
+//         element.setAttribute(attr, attributes[attr])
+//     }
 
-    const title = document.getElementById('add-in-progress-task').value
-    if (!document.getElementById('extraInProgress').classList.contains('')) document.getElementById('extraInProgress').classList.add('hide')
-    if (inputCheck(title)) {
-        addExtra(title, 'InProgress')
-        addTask(title, 'in-progress')
-    }
-}
+//     //attrubutes
 
-function handleaddDoneTask() {
-    //when "add done task" button is pressed:
-    //take the relavant input value
-    //send it to addTask() &  addExtra()
+//     for (const event in events) {
+//         element.addEventListener(event, events[event])
+//     }
 
-    const title = document.getElementById('add-done-task').value
-    if (!document.getElementById('extraDone').classList.contains('')) document.getElementById('extraDone').classList.add('hide')
-    if (inputCheck(title)) {
-        addExtra(title, 'Done')
-        addTask(title, 'done')
-    }
-}
+//     return element
+// }
 
-function inputCheck(input) {
-    //checks if "input" is valid.
+// function createExtraElement(title) {
+//     //Parameters:tasks title.
+//     //TAKES INFORMATION FROM taskExtraInfo (IF IT EXSIST)
+//     //BUILDS A DOM ELEMNT OUT OF THIS DATA
+//     //APPENDS IT AFTER THE RELEVANT TASK ELEMNT
+//     //THIS FUNCTION Starts working ONLY when the user clicks the relevant task(openExtraInfo())
+//     //on the next click on the same task element, this element will be removed.
 
-    if (input === '' || howManyTasksHaveThatName(input) > 0 || input.includes('\n') || input.includes('  ')) {
-        alert('invalid input')
-        return false
-    }
-    return true
-}
+//     title = kababToString(title)
+//     const removeBtn = createElement('button', ['remove task❌'], ['remove'], {
+//         name: 'remove',
+//         'data-title': stringToKabab(title),
+//     })
+//     let extraInfoElement = createElement('div', [removeBtn], ['info'], {
+//         'data-title-exstra': stringToKabab(title),
+//     })
+//     extraInfoElement.appendChild(createElement('b', [title], [], {}))
+//     extraInfoElement.style.backgroundColor = colorFromImportance(importance(title))
 
-function howManyTasksHaveThatName(title) {
-    //Parameters:title
-    //returns:the number of times "title" apper in "tasks"
+//     if (taskExtraInfo.hasOwnProperty(title)) {
+//         let days = createElement(
+//             'div',
+//             ['days left (Estimated time):' + daysleft(title) + '(' + taskExtraInfo[title].timeEstimated] + ')',
+//             ['coldInfo'],
+//             {}
+//         )
+//         let deadline = createElement('div', ['deadline:' + taskExtraInfo[title]['deadline']], ['coldInfo'], {})
+//         let calcPriority = createElement('div', ['calculated priority:' + importance(title) * 10], ['coldInfo'], {})
+//         let right = createElement('div', [deadline, days, calcPriority], ['right'], {})
+//         let description = createElement('div', [taskExtraInfo[title].description], ['description'], {})
+//         let infoSec = createElement('div', [description, right], ['infoSec'], {})
+//         extraInfoElement.appendChild(infoSec)
+//     } else extraInfoElement.appendChild(createElement('div', [`no extra information for ${title}`], [], {}))
 
-    let i = 0
-    for (let state in tasks) {
-        for (let task of tasks[state]) {
-            if (task === title) {
-                i++
-            }
-        }
-    }
-    return i
-}
+//     let kababTitle = stringToKabab(title)
+//     const parentGuest = document.querySelectorAll(`[data-title~="${kababTitle}"]`)[0]
+//     parentGuest.parentNode.insertBefore(extraInfoElement, parentGuest.nextSibling)
+// }
 
-//task manipulation
+// function openExtraInfo(event) {
+//     //adds a relevant extra info element after the task element
+//     //if its exsist already, removes it.(basiclly toggiling)
+//     setTimeout(function () {
+//         if (dblClicked === true) return
+//         const title = stringToKabab(event.target.firstChild.wholeText)
+//         if (event.target.parentElement.querySelectorAll(`[data-title-exstra~="${title}"]`)[0])
+//             event.target.parentElement.querySelectorAll(`[data-title-exstra~="${title}"]`)[0].remove()
+//         else {
+//             createExtraElement(title)
+//         }
+//     }, 300)
+// }
 
-function moveTask(title, target) {
-    //Parameters:tasks title, wanted target state.("todo"/"in-progress"/"done")
-    //moves the task.
+// function createTaskElement(title, state) {
+//     //uses createElement to creat an task elment
+//     //appends it to the matching <ul>
 
-    removeTask(title)
-    addTask(title, target)
-}
+//     let newTaskElement = createElement('li', [title], ['task', 'draggable'], { 'data-title': stringToKabab(title) }, {})
+//     newTaskElement.addEventListener('click', openExtraInfo)
+//     newTaskElement.addEventListener('mousedown', clickDrugAndDropHandler)
 
-function rename(oldName, newName) {
-    //Parameters:tasks oldName, and newName(titles)
-    //renames the task.
-    //updates localstorage and DOM
+//     if (state === 'todo') appendElement('toDoTasks', newTaskElement)
+//     if (state === 'in-progress') appendElement('inProgressTasks', newTaskElement)
+//     if (state === 'done') appendElement('doneTasks', newTaskElement)
+// }
 
-    for (let state in tasks) {
-        let i = 0
-        for (let task of tasks[state]) {
-            if (task === oldName) {
-                tasks[state].splice(i, 1, newName)
-            }
-            i++
-        }
-    }
-    taskExtraInfo[newName] = Object.assign({}, taskExtraInfo[oldName])
-    sendToLocal()
-    displayElements()
-}
+// function appendElement(parentId, element) {
+//     //appends element child to parent
 
-function removeTask(title) {
-    //Parameters:tasks title.
-    //removes this task from "tasks"
-    //updates localstorage and DOM
+//     document.getElementById(parentId).appendChild(element)
+// }
 
-    for (let state in tasks) {
-        let i = 0
-        for (let task of tasks[state]) {
-            if (task === title) {
-                tasks[state].splice(i, 1)
-            }
-            i++
-        }
-    }
-    sendToLocal()
-    displayElements()
-}
+// function generateTasks() {
+//     //uses createTaskElement to create (and append to matching parent) an element for each "tasks" object.
 
-//DOM
+//     for (let state in tasks) {
+//         for (let task of tasks[state]) {
+//             createTaskElement(task, state)
+//         }
+//     }
+// }
 
-function createElement(tagname, children = [], classes = [], attributes, events) {
-    //the most generic element builder.
-    //we will build all the elements here.
+// function removeAllchildrens(parentId) {
+//     //remove all the childrens from parant
 
-    let element = document.createElement(tagname)
+//     let parent = document.getElementById(parentId)
+//     while (parent.firstChild) {
+//         parent.removeChild(parent.lastChild)
+//     }
+// }
 
-    //children
+// function removeAllTasksElements() {
+//     //remove all tasks from the tasks <ul> elemnts.
 
-    for (let child of children) {
-        if (typeof child === 'string' || typeof child === 'number') {
-            child = document.createTextNode(child)
-        }
-        element.appendChild(child)
-    }
+//     removeAllchildrens('toDoTasks')
+//     removeAllchildrens('inProgressTasks')
+//     removeAllchildrens('doneTasks')
+// }
 
-    //classes
+// export function displayElements() {
+//     //itialization the DOM PAGE:
+//     //sets the gauge according to howBusy().
+//     //remove parents from all childrens
+//     //fill them again from "tasks"
 
-    for (const cls of classes) {
-        element.classList.add(cls)
-    }
+//     nitialization(howBusy())
+//     removeAllTasksElements()
+//     generateTasks()
+// }
 
-    //attrubutes
+// function setTheme() {
+//     //get theme from selector.
+//     //set it to the page
+//     //send it to local storege.
 
-    for (const attr in attributes) {
-        element.setAttribute(attr, attributes[attr])
-    }
-
-    //attrubutes
-
-    for (const event in events) {
-        element.addEventListener(event, events[event])
-    }
-
-    return element
-}
-
-function createExtraElement(title) {
-    //Parameters:tasks title.
-    //TAKES INFORMATION FROM taskExtraInfo (IF IT EXSIST)
-    //BUILDS A DOM ELEMNT OUT OF THIS DATA
-    //APPENDS IT AFTER THE RELEVANT TASK ELEMNT
-    //THIS FUNCTION Starts working ONLY when the user clicks the relevant task(openExtraInfo())
-    //on the next click on the same task element, this element will be removed.
-
-    title = kababToString(title)
-    const removeBtn = createElement('button', ['remove task❌'], ['remove'], {
-        name: 'remove',
-        'data-title': stringToKabab(title),
-    })
-    let extraInfoElement = createElement('div', [removeBtn], ['info'], {
-        'data-title-exstra': stringToKabab(title),
-    })
-    extraInfoElement.appendChild(createElement('b', [title], [], {}))
-    extraInfoElement.style.backgroundColor = colorFromImportance(importance(title))
-
-    if (taskExtraInfo.hasOwnProperty(title)) {
-        let days = createElement(
-            'div',
-            ['days left (Estimated time):' + daysleft(title) + '(' + taskExtraInfo[title].timeEstimated] + ')',
-            ['coldInfo'],
-            {}
-        )
-        let deadline = createElement('div', ['deadline:' + taskExtraInfo[title]['deadline']], ['coldInfo'], {})
-        let calcPriority = createElement('div', ['calculated priority:' + importance(title) * 10], ['coldInfo'], {})
-        let right = createElement('div', [deadline, days, calcPriority], ['right'], {})
-        let description = createElement('div', [taskExtraInfo[title].description], ['description'], {})
-        let infoSec = createElement('div', [description, right], ['infoSec'], {})
-        extraInfoElement.appendChild(infoSec)
-    } else extraInfoElement.appendChild(createElement('div', [`no extra information for ${title}`], [], {}))
-
-    let kababTitle = stringToKabab(title)
-    const parentGuest = document.querySelectorAll(`[data-title~="${kababTitle}"]`)[0]
-    parentGuest.parentNode.insertBefore(extraInfoElement, parentGuest.nextSibling)
-}
-
-function openExtraInfo(event) {
-    //adds a relevant extra info element after the task element
-    //if its exsist already, removes it.(basiclly toggiling)
-    setTimeout(function () {
-        if (dblClicked === true) return
-        const title = stringToKabab(event.target.firstChild.wholeText)
-        if (event.target.parentElement.querySelectorAll(`[data-title-exstra~="${title}"]`)[0])
-            event.target.parentElement.querySelectorAll(`[data-title-exstra~="${title}"]`)[0].remove()
-        else {
-            createExtraElement(title)
-        }
-    }, 300)
-}
-
-function createTaskElement(title, state) {
-    //uses createElement to creat an task elment
-    //appends it to the matching <ul>
-
-    let newTaskElement = createElement('li', [title], ['task', 'draggable'], { 'data-title': stringToKabab(title) }, {})
-    newTaskElement.addEventListener('click', openExtraInfo)
-    newTaskElement.addEventListener('mousedown', clickDrugAndDropHandler)
-
-    if (state === 'todo') appendElement('toDoTasks', newTaskElement)
-    if (state === 'in-progress') appendElement('inProgressTasks', newTaskElement)
-    if (state === 'done') appendElement('doneTasks', newTaskElement)
-}
-
-function appendElement(parentId, element) {
-    //appends element child to parent
-
-    document.getElementById(parentId).appendChild(element)
-}
-
-function generateTasks() {
-    //uses createTaskElement to create (and append to matching parent) an element for each "tasks" object.
-
-    for (let state in tasks) {
-        for (let task of tasks[state]) {
-            createTaskElement(task, state)
-        }
-    }
-}
-
-function removeAllchildrens(parentId) {
-    //remove all the childrens from parant
-
-    let parent = document.getElementById(parentId)
-    while (parent.firstChild) {
-        parent.removeChild(parent.lastChild)
-    }
-}
-
-function removeAllTasksElements() {
-    //remove all tasks from the tasks <ul> elemnts.
-
-    removeAllchildrens('toDoTasks')
-    removeAllchildrens('inProgressTasks')
-    removeAllchildrens('doneTasks')
-}
-
-function displayElements() {
-    //itialization the DOM PAGE:
-    //sets the gauge according to howBusy().
-    //remove parents from all childrens
-    //fill them again from "tasks"
-
-    nitialization(howBusy())
-    removeAllTasksElements()
-    generateTasks()
-}
-
-function setTheme() {
-    //get theme from selector.
-    //set it to the page
-    //send it to local storege.
-
-    const themeName = document.getElementById('theme').value
-    localStorage.setItem('theme', themeName)
-    document.documentElement.className = themeName
-}
+//     const themeName = document.getElementById('theme').value
+//     localStorage.setItem('theme', themeName)
+//     document.documentElement.className = themeName
+// }
 
 //SEARCH
 
@@ -741,189 +584,4 @@ async function saveData() {
         //response is having a kind of problem.
         document.getElementById('errorBar').innerText = response.status + ':' + response.statusText
     } else document.getElementById('errorBar').innerText = 'saved!'
-}
-
-let dblClicked = false // later used to determine if to start drag and drop
-let mouseDown = false // later used to determine if to start drag and drop
-
-function clickDrugAndDropHandler(event) {
-    const target = event.target
-
-    event.preventDefault() // to prevent the selecting action of click
-
-    mouseDown = true
-
-    function onMouseUp(event) {
-        if (event.target === target) {
-            mouseDown = false
-        }
-    }
-
-    document.addEventListener('mouseup', onMouseUp)
-
-    // the main drag and drop section!
-    // we set a time out so the user can make a dblclick without starting to drag
-    // I found that the best time is 300 ms. microsoft says its 500 ms ;)
-
-    setTimeout(() => {
-        if (dblClicked === true || mouseDown === false) return
-
-        event.preventDefault()
-
-        target.classList.add('taskOnTheMove')
-
-        let shiftX = event.clientX - target.getBoundingClientRect().left
-        let shiftY = event.clientY - target.getBoundingClientRect().top
-
-        target.style.position = 'absolute'
-        target.style.zIndex = 1000
-        document.body.append(target)
-
-        moveAt(event.pageX, event.pageY)
-
-        // moves the task at (pageX, pageY) coordinates
-        // taking initial shifts into account
-        function moveAt(pageX, pageY) {
-            target.style.left = pageX - shiftX + 'px'
-            target.style.top = pageY - shiftY - 5 + 'px' // small adjustment for better performance
-        }
-
-        let currentDroppable = null
-
-        function onMouseMove(event) {
-            moveAt(event.pageX, event.pageY)
-
-            target.style.display = 'none'
-            let elemBelow = document.elementFromPoint(event.clientX, event.clientY)
-            target.style.display = ''
-
-            // mousemove events may trigger out of the window (when the ball is dragged off-screen)
-            // if clientX/clientY are out of the window, then elementFromPoint returns null
-            if (!elemBelow) return
-
-            // potential droppable are labeled with the class "droppable" (can be other logic)
-            let droppableBelow = elemBelow.closest('.droppable')
-
-            if (currentDroppable != droppableBelow) {
-                // we're flying in or out...
-                // note: both values can be null
-                //   currentDroppable=null if we were not over a droppable before this event (e.g over an empty space)
-                //   droppableBelow=null if we're not over a droppable now, during this event
-
-                if (currentDroppable) {
-                    // the logic to process "flying out" of the droppable (remove highlight)
-                    leaveDroppable(currentDroppable)
-                }
-                currentDroppable = droppableBelow
-                if (currentDroppable) {
-                    // the logic to process "flying in" of the droppable
-                    enterDroppable(currentDroppable)
-                }
-            }
-        }
-
-        // move the task on mousemove
-        document.addEventListener('mousemove', onMouseMove)
-
-        // drop the task, remove unneeded handlers
-
-        // drop the task, remove unneeded handlers
-        target.onmouseup = function () {
-            if (currentDroppable) {
-                moveTask(kababToString(target.dataset.title), currentDroppable.dataset.state)
-                currentDroppable.classList.remove('waitingForDrop')
-                document.removeEventListener('mousemove', onMouseMove)
-                target.onmouseup = null
-                target.remove()
-                displayElements()
-            } else {
-                document.removeEventListener('mousemove', onMouseMove)
-                target.onmouseup = null
-                target.remove()
-                displayElements()
-                return
-            }
-        }
-    }, 300)
-}
-
-function enterDroppable(droppableElement) {
-    if (droppableElement.tagName === 'LI') {
-        droppableElement.classList.add('below-drag')
-    }
-}
-
-function leaveDroppable(droppableElement) {
-    if (droppableElement.tagName === 'LI') {
-        droppableElement.classList.remove('below-drag')
-    }
-}
-// The Gauge-- not my writing! its imported and modified to my needs
-
-function Gauge(el) {
-    //Private Properties and Attributes
-
-    let element, // Containing element for the info component
-        data, // `.gauge__data` element
-        needle, // `.gauge__needle` element
-        value = 0.0, // Current gauge value from 0 to 1
-        prop // Style for transform
-
-    //Private Methods and Functions
-
-    let setElement = function (el) {
-        // Keep a reference to the various elements and sub-elements
-        element = el
-        data = element.querySelector('.gauge__data')
-        needle = element.querySelector('.gauge__needle')
-    }
-
-    let setValue = function (x) {
-        value = x
-        let turns = -0.5 + x * 0.5
-        data.style[prop] = 'rotate(' + turns + 'turn)'
-        needle.style[prop] = 'rotate(' + turns + 'turn)'
-    }
-
-    //Object to be Returned
-
-    function exports() {}
-
-    //Public API Methods
-
-    exports.element = function (el) {
-        if (!arguments.length) {
-            return element
-        }
-        setElement(el)
-        return this
-    }
-
-    exports.value = function (x) {
-        if (!arguments.length) {
-            return value
-        }
-        setValue(x)
-        return this
-    }
-
-    //nitialization
-
-    let body = document.getElementsByTagName('body')[0]
-    ;['webkitTransform', 'mozTransform', 'msTransform', 'oTransform', 'transform'].forEach(function (p) {
-        if (typeof body.style[p] !== 'undefined') {
-            prop = p
-        }
-    })
-
-    if (arguments.length) {
-        setElement(el)
-    }
-
-    return exports
-}
-
-function nitialization(howBusy) {
-    let gauge = new Gauge(document.getElementById('gauge'))
-    gauge.value(howBusy)
 }
