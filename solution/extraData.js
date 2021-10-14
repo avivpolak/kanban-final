@@ -1,4 +1,4 @@
-import { tasks, taskExtraInfo } from './index.js'
+import { tasks, taskExtraInfo } from './dataStructures'
 //EXTRA-Data processing functions:
 
 export function daysleft(title) {

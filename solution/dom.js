@@ -1,11 +1,12 @@
 import { nitialization } from './gauge'
 import { howBusy, colorFromImportance, importance, daysleft } from './extraData'
-import { tasks, taskExtraInfo, sendToLocal, stringToKabab, kababToString } from './index.js'
+import { tasks, taskExtraInfo } from './dataStructures'
 import { clickDrugAndDropHandler, dblClicked } from './dragAndDrop'
+import { stringToKabab, kababToString } from './other'
 
 //DOM
 
-function createElement(tagname, children = [], classes = [], attributes, events) {
+export function createElement(tagname, children = [], classes = [], attributes, events) {
     //the most generic element builder.
     //we will build all the elements here.
 

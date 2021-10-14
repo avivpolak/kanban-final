@@ -1,6 +1,7 @@
-import { tasks, taskExtraInfo, sendToLocal } from './index.js'
+import { tasks, taskExtraInfo } from './dataStructures'
 import { addTask } from './add'
 import { displayElements } from './dom'
+import { sendToLocal } from './localStorage'
 //task manipulation
 
 export function moveTask(title, target) {

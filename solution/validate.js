@@ -1,4 +1,4 @@
-import { tasks } from './index.js'
+import { tasks } from './dataStructures'
 export function inputCheck(input) {
     //checks if "input" is valid.
 

@@ -1,6 +1,7 @@
-import { tasks, taskExtraInfo, sendToLocal } from './index.js'
+import { tasks, taskExtraInfo } from './dataStructures'
 import { displayElements } from './dom'
 import { inputCheck } from './validate.js'
+import { sendToLocal } from './localStorage'
 //add data to "tasks" & "taskExtraInfo"
 
 export function getExtraInput(state) {

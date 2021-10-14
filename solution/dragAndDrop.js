@@ -1,6 +1,7 @@
 import { moveTask } from './task'
 import { displayElements } from './dom'
-import { kababToString } from './index'
+
+import { kababToString } from './other'
 
 export let dblClicked = false // later used to determine if to start drag and drop
 let mouseDown = false // later used to determine if to start drag and drop
