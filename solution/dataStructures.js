@@ -1,3 +1,4 @@
+import { setTheme } from './dom'
 //DATA STRUCTURES-
 
 //***"tasks" :
